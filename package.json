@@ -2,12 +2,12 @@
   "name": "kevin-fypproject2025",
   "version": "0.0.0",
   "scripts": {
-    "dev-node": "tsx watch src/server",
-    "ng": "ng",
-    "dev": "ng serve --proxy-config proxy.conf.json",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "dev-node": "node_modules/.bin/tsx watch src/server",
+    "ng": "node_modules/.bin/ng",
+    "dev": "node_modules/.bin/ng serve --proxy-config proxy.conf.json",
+    "build": "node_modules/.bin/ng build",
+    "watch": "node_modules/.bin/ng build --watch --configuration development",
+    "test": "node_modules/.bin/ng test"
   },
   "private": true,
   "dependencies": {
@@ -21,7 +21,11 @@
     "@angular/platform-browser": "^19.1.6",
     "@angular/platform-browser-dynamic": "^19.1.6",
     "@angular/router": "^19.1.6",
+    "axios": "^1.8.4",
     "express": "^4.21.2",
+    "ng2-pdf-viewer": "^10.4.0",
+    "ngx-extended-pdf-viewer": "^23.0.0-alpha.6",
+    "pdf-lib": "^1.17.1",
     "remult": "^2.7.29",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
@@ -34,6 +38,7 @@
     "@angular/compiler-cli": "^19.1.6",
     "@types/express": "^5.0.0",
     "@types/jasmine": "~5.1.0",
+    "@types/node": "^22.13.13",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

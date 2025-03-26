@@ -1,0 +1,96 @@
+/* components/pdf-parser/pdf-parser.component.scss */
+.pdf-parser-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+
+  h2 {
+    margin-bottom: 20px;
+  }
+}
+
+.upload-section {
+  margin-bottom: 20px;
+
+  input[type="file"] {
+    display: none;
+  }
+
+  button {
+    padding: 10px 15px;
+    background: #3f51b5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background: #303f9f;
+    }
+  }
+}
+
+.loading, .error {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+.loading {
+  background: #fff8e1;
+  color: #ff8f00;
+}
+
+.error {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.content-container {
+  display: flex;
+  gap: 20px;
+}
+
+.pdf-preview {
+  flex: 1;
+  min-width: 0;
+
+  h3 {
+    margin-bottom: 10px;
+  }
+}
+
+.requirements-list {
+  flex: 1;
+  min-width: 0;
+
+  h3 {
+    margin-bottom: 10px;
+  }
+}
+
+.filter-controls {
+  margin-bottom: 15px;
+}
+
+.requirement {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-left: 3px solid #bdbdbd;
+  background: #f5f5f5;
+
+  &.critical {
+    border-left-color: #f44336;
+    background: #ffebee;
+  }
+
+  .req-text {
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  .req-meta {
+    font-size: 0.8em;
+    color: #616161;
+  }
+}

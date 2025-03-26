@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Task } from '../../shared/task'
+import { Task } from '../../../shared/task'
 import {remult} from "remult";
 import {NgForOf} from "@angular/common";
 import {FormsModule} from "@angular/forms";
