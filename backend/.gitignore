@@ -42,4 +42,5 @@ testem.log
 Thumbs.db
 src/.env
 
+FirebaseService.json
 prisma/
