@@ -40,7 +40,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
-src/.env
+.env
 
-FirebaseService.json
 prisma/
+FirebaseService.json
+
