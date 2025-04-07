@@ -3,17 +3,18 @@ import { CommonModule } from "@angular/common";
 import { Router, RouterLink } from "@angular/router";
 import { NavigationService } from "../../../services/navigation.service";
 import { Observable } from "rxjs";
+import { LoginComponent } from "../login/login.component";
 
 @Component({
-    selector: "app-header",
-    template: `
+  selector: "app-header",
+  template: `
     <header
-      class="flex overflow-hidden flex-wrap gap-2 items-center p-1 bg-white border-b border-zinc-300 "
+      class="fixed top-0 left-0 right-0 z-50 flex overflow-hidden flex-wrap gap-2 items-center p-1 bg-white border-b border-zinc-300"
     >
       <div class="flex gap-6 items-center self-stretch my-auto w-[169px]">
         <img
-          src="https://cdn.builder.io/api/v1/image/assets/3442e6b8e527437aa22d70a48962b97f/ad7d09571639370ed17afa12f57cbd4157a8f0f9?placeholderIfAbsent=true"
-          class="object-contain self-stretch my-auto rounded-md aspect-[1.34] w-[169px]"
+          src="../../../assets/images/logo.png"
+          class="object-contain self-stretch my-auto rounded-md aspect-[1.34] w-[100px]"
           alt="Logo"
         />
       </div>
@@ -37,30 +38,25 @@ import { Observable } from "rxjs";
         </button>
         <button class="gap-2 self-stretch p-2 rounded-lg">Settings</button>
       </nav>
-      <div
-        class="flex gap-3 items-center self-stretch my-auto text-base leading-none text-stone-900 w-[178px]"
-      >
-        <button
-          class="overflow-hidden flex-1 shrink gap-2 self-stretch p-2 my-auto w-full rounded-lg border border-solid basis-0 bg-neutral-200 border-neutral-500"
-        >
-          Sign Out
-        </button>
+      <div class="flex gap-3 items-center self-stretch my-auto text-base leading-none text-stone-900 w-[178px]">
+        <app-login></app-login>
       </div>
     </header>
   `,
-    styles: [
-        `
+  styles: [
+    `
       :host {
-        display: contents;
-        width: 100%;
+        display: block;
+        height: 56px;
       }
 
       header {
         width: 100%;
       }
     `,
-    ],
-    imports: [CommonModule, RouterLink]
+  ],
+  standalone: true,
+  imports: [CommonModule, RouterLink, LoginComponent]
 })
 export class HeaderComponent implements OnInit {
   isDashboard$: Observable<boolean>;

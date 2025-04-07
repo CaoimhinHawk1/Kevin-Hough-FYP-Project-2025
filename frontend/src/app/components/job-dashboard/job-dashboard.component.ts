@@ -2,11 +2,23 @@ import { Component, OnInit, HostListener } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { NavigationService } from "../../../services/navigation.service";
+import {MatDialog} from "@angular/material/dialog";
+import { JobModalComponent } from "./job-modal/job-model.component";
 
 interface JobListing {
   location: string;
   description: string;
   day: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday";
+}
+
+interface JobModal {
+  title: string;
+  location: string;
+  description: string;
+  date: string;
+  status: string;
+  assignedTo: string[];
+  equipment: string[];
 }
 
 interface Marquee {
@@ -20,10 +32,11 @@ interface Vehicle {
 }
 
 @Component({
-    selector: "app-job-dashboard",
-    templateUrl: "./job-dashboard.component.html",
-    styleUrls: ["./job-dashboard.component.css"],
-    imports: [CommonModule, FormsModule]
+  selector: "app-job-dashboard",
+  templateUrl: "./job-dashboard.component.html",
+  styleUrls: ["./job-dashboard.component.css"],
+  standalone: true,
+  imports: [CommonModule, FormsModule]
 })
 export class JobDashboardComponent implements OnInit {
   searchQuery: string = "";
@@ -62,12 +75,17 @@ export class JobDashboardComponent implements OnInit {
     { initial: "A", name: "TOYOTA HILUX 171-L-685" },
   ];
 
+
+
   @HostListener("window:resize", ["$event"])
   onResize(event: any) {
     this.screenWidth = window.innerWidth;
   }
 
-  constructor(private navigationService: NavigationService) {}
+  constructor(
+      private navigationService: NavigationService,
+      private dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
     this.navigationService.setDashboardPage(true);
@@ -89,12 +107,32 @@ export class JobDashboardComponent implements OnInit {
     return this.jobListings.filter((job) => job.day === day);
   }
 
-  showJobDetails(job: JobListing): void {
-    console.log("Showing details for job:", job);
-    // Implement navigation or modal display logic here
-  }
-
   isMobileView(): boolean {
     return this.screenWidth < 768;
+  }
+
+  showJobDetails(job: JobListing): void {
+    const modalData: JobModal = {
+      title: `Job at ${job.location}`,
+      location: job.location,
+      description: job.description,
+      date: job.day,
+      status: "Pending",
+      assignedTo: ["John Doe", "Jane Smith"],
+      equipment: ["20x50 Marquee", "30x60 Marquee", "6 Portaloos"]
+    };
+
+    const dialogRef = this.dialog.open(JobModalComponent, {
+      data: modalData,
+      width: '90%',
+      maxWidth: '600px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'edit') {
+        // Handle edit action
+        console.log('Edit job:', job);
+      }
+    });
   }
 }

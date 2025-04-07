@@ -3,11 +3,20 @@ import { JobDashboardComponent } from "./components/job-dashboard/job-dashboard.
 import { HomeComponent } from "./components/home/home.component";
 import { DashboardComponent } from "./components/dashboard/dashboard.component";
 import { LoginComponent } from "./components/login/login.component";
+import { AuthGuard } from "./guards/auth.guard";
 
 export const routes: Routes = [
   { path: "", redirectTo: "/home", pathMatch: "full" },
-  { path: "login", component: LoginComponent },
   { path: "home", component: HomeComponent },
-  { path: "dashboard", component: DashboardComponent },
-  { path: "job-dashboard", component: JobDashboardComponent },
+  { path: "login", component: LoginComponent },
+  {
+    path: "dashboard",
+    component: DashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: "job-dashboard",
+    component: JobDashboardComponent,
+    canActivate: [AuthGuard]
+  },
 ];
