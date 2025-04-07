@@ -36,7 +36,7 @@ interface Vehicle {
   templateUrl: "./job-dashboard.component.html",
   styleUrls: ["./job-dashboard.component.css"],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule],
 })
 export class JobDashboardComponent implements OnInit {
   searchQuery: string = "";
@@ -105,6 +105,11 @@ export class JobDashboardComponent implements OnInit {
 
   getJobsForDay(day: string): JobListing[] {
     return this.jobListings.filter((job) => job.day === day);
+  }
+
+  showJobDetails(job: JobListing): void {
+    console.log("Showing details for job:", job);
+    // Implement navigation or modal display logic here
   }
 
   isMobileView(): boolean {
