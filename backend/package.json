@@ -4,9 +4,9 @@
   "main": "index.js",
   "scripts": {
     "pretest": "npm run build",
-    "dev": "tsnd --respawn -r tsconfig.json-paths/regsiter --pretty --transpile-only ./src/index.ts",
+    "dev": "tsnd --respawn -r tsconfig-paths/register --pretty --transpile-only ./src/index.ts",
     "build": "tsc && tsc-alias",
-    "start": "./dist",
+    "start": "node -r tsconfig-paths/register dist/index.js",
     "postinstall": "prisma generate",
     "test": "jest --config ./jest.config.json && npm run parse-r && npm run parse-fd",
     "seed": "ts-node prisma/seed.ts"
@@ -17,11 +17,16 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.5.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.1",
     "bcrypt": "^5.1.1",
+    "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "firebase": "^11.6.0",
+    "firebase-admin": "^13.2.0",
     "mongoose": "^8.12.1",
     "multer": "^1.4.5-lts.2",
     "pdf2json": "^3.1.4",
@@ -32,6 +37,7 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
     "@types/node": "^22.14.0",
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.13",
