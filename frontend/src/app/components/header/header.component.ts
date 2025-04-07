@@ -33,9 +33,8 @@ import { Observable } from "rxjs";
         class="flex flex-wrap flex-1 shrink gap-2 items-start self-stretch my-auto text-base leading-none whitespace-nowrap basis-0 min-w-60 text-stone-900 max-md:max-w-full"
       >
         <button routerLink="/dashboard" class="gap-2 self-stretch p-2 rounded-lg bg-neutral-100">
-          Overview
+          Dashboard
         </button>
-        <button class="gap-2 self-stretch p-2 rounded-lg">Profile</button>
         <button class="gap-2 self-stretch p-2 rounded-lg">Settings</button>
       </nav>
       <div

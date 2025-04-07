@@ -1,0 +1,65 @@
+/* Custom styles for job dashboard */
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+.font-roboto {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Ensure the vehicle initial is centered */
+.rounded-full {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Custom styles for the job cards */
+.border-black\/10 {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Custom styles for the active tab indicators */
+.text-black {
+  color: #000;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  /* Make text smaller on mobile */
+  .text-base {
+    font-size: 0.875rem;
+  }
+
+  /* Reduce padding on mobile */
+  .p-6 {
+    padding: 1rem;
+  }
+
+  /* Ensure buttons are properly sized */
+  button {
+    width: 100%;
+  }
+}
+
+/* Ensure content doesn't overflow */
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Improve scrolling experience */
+.overflow-y-auto, .overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* Ensure the sidebar collapses properly on mobile */
+@media (max-width: 768px) {
+  .w-\[212px\] {
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+}

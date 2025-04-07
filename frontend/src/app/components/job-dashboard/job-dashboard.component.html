@@ -1,0 +1,452 @@
+<div class="flex flex-col md:flex-row h-screen overflow-hidden bg-white">
+  <!-- Sidebar -->
+  <div class="w-full md:w-[212px] border-r border-black/10 p-4 flex flex-col gap-2 md:h-screen overflow-y-auto">
+    <!-- User Section -->
+    <div class="pb-3">
+      <div class="flex p-2 items-center gap-2">
+        <div class="w-6 h-6 rounded-full flex justify-center items-center">
+          <img src="assets/images/user.png" alt="User" class="w-6 h-6" />
+        </div>
+        <div class="font-inter text-sm text-black">USER</div>
+      </div>
+      <div class="h-px my-0.5"></div>
+    </div>
+
+    <!-- Dashboards Section -->
+    <div class="flex flex-col gap-1">
+      <div class="px-3 py-1 text-black/40 font-inter text-sm">Dashboards</div>
+      <div class="flex p-2 items-center gap-2 rounded-xl">
+        <div class="flex justify-center items-center">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            class="chart-icon"
+          >
+            <path
+              d=""
+              fill="black"
+            ></path>
+          </svg>
+        </div>
+        <div class="font-inter text-sm text-black">Overview</div>
+      </div>
+    </div>
+
+    <!-- Pages Section -->
+    <div class="flex flex-col gap-1">
+      <div class="px-3 py-1 text-black/40 font-inter text-sm">Pages</div>
+      <div>
+        <div class="flex p-2 items-center gap-2 rounded-xl">
+          <div class="flex justify-center items-center">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              class="user-icon"
+            >
+              <path
+                d=""
+                fill="black"
+                fill-opacity="0.04"
+              ></path>
+              <path
+                d=""
+                fill="black"
+              ></path>
+            </svg>
+          </div>
+          <div class="font-inter text-sm text-black">User Profile</div>
+        </div>
+        <div class="p-2 font-inter text-sm text-black rounded-xl">Overview</div>
+        <div class="p-2 font-inter text-sm text-black rounded-xl">
+          Job Listings
+        </div>
+        <div class="p-2 font-inter text-sm text-black rounded-xl">
+          Campaigns
+        </div>
+        <div class="p-2 font-inter text-sm text-black rounded-xl">
+          Notifications
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col overflow-y-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 sm:py-5 px-4 sm:px-7 border-b border-black/10">
+      <!-- Left Side -->
+      <div class="flex flex-wrap items-center gap-2 mb-3 sm:mb-0">
+        <!-- Action Buttons -->
+        <div class="flex gap-2">
+          <div class="p-1 rounded-lg">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d=""
+                fill="black"
+                fill-opacity="0.04"
+              ></path>
+              <path
+                d=""
+                fill="black"
+              ></path>
+            </svg>
+          </div>
+          <div class="p-1 rounded-lg">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d=""
+                fill="black"
+                fill-opacity="0.04"
+              ></path>
+              <path
+                d=""
+                fill="black"
+              ></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 overflow-x-auto">
+          <div class="px-2 py-1 text-sm text-black/40">Dashboards</div>
+          <span class="text-xs text-black/20">/</span>
+          <div class="px-2 py-1 text-sm text-black/40">Default</div>
+        </div>
+      </div>
+
+      <!-- Right Side -->
+      <div class="flex flex-wrap items-center gap-3 sm:gap-5">
+        <!-- Search -->
+        <div class="flex items-center px-2 py-1 w-40 rounded-xl">
+          <div class="flex items-center gap-2 flex-1">
+            <div class="w-4 h-4">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d=""
+                  fill="black"
+                  fill-opacity="0.2"
+                ></path>
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Search"
+              [(ngModel)]="searchQuery"
+              name="searchQuery"
+              class="border-none text-sm text-black/20 font-inter outline-none bg-transparent"
+            />
+          </div>
+          <div
+            class="w-5 text-xs text-center text-black/20 border border-solid border-black/0 bg-white/20"
+          >
+            /
+          </div>
+        </div>
+
+        <!-- Action Icons -->
+        <div class="flex gap-2">
+          <div class="p-1 rounded-lg">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d=""
+                fill="black"
+                fill-opacity="0.04"
+              ></path>
+              <path
+                d=""
+                fill="black"
+              ></path>
+            </svg>
+          </div>
+          <div class="p-1 rounded-lg">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d=""
+                fill="black"
+              ></path>
+            </svg>
+          </div>
+          <div class="p-1 rounded-lg">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d=""
+                fill="black"
+                fill-opacity="0.04"
+              ></path>
+              <path
+                d=""
+                fill="black"
+              ></path>
+            </svg>
+          </div>
+          <div class="p-1 rounded-lg">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d=""
+                fill="black"
+                fill-opacity="0.04"
+              ></path>
+              <path
+                d=""
+                fill="black"
+              ></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="flex flex-wrap gap-4 sm:gap-7 p-3 sm:p-5">
+      <!-- Job Listings Section -->
+      <div class="w-full lg:flex-1 rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
+          <h2 class="font-inter text-sm font-semibold text-black">
+            Job Listings
+          </h2>
+          <div class="flex gap-4">
+            <span
+              class="font-inter text-sm text-black/40 cursor-pointer"
+              [class.text-black]="activeView === 'weekly'"
+              (click)="setActiveView('weekly')"
+            >Weekly</span
+            >
+            <span
+              class="font-inter text-sm text-black/40 cursor-pointer"
+              [class.text-black]="activeView === 'monthly'"
+              (click)="setActiveView('monthly')"
+            >Monthly</span
+            >
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <!-- Days Header -->
+          <div class="hidden md:flex justify-between overflow-x-auto">
+            <div *ngFor="let day of days" class="min-w-[100px] md:w-[162px] p-2 text-center font-inter text-base text-[#767676] border-b border-black/10">
+              {{ day }}
+            </div>
+          </div>
+
+          <!-- Mobile Day Selector -->
+          <div class="md:hidden mb-4">
+            <select class="w-full p-2 border border-black/10 rounded-lg font-inter text-base" [(ngModel)]="selectedDay" name="daySelector">
+              <option *ngFor="let day of days" [value]="day">{{day}}</option>
+            </select>
+          </div>
+
+          <!-- Job Cards Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Mobile: Jobs for Selected Day -->
+            <ng-container *ngIf="isMobileView()">
+              <ng-container *ngFor="let job of getJobsForDay(selectedDay)">
+                <div class="p-4 border border-black/10 rounded-lg">
+                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">{{job.location}}</h3>
+                  <p class="font-inter text-base text-[#1E1E1E] mb-2">{{job.description}}</p>
+                  <button
+                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
+                    (click)="showJobDetails(job)">
+                    Details
+                  </button>
+                </div>
+              </ng-container>
+            </ng-container>
+
+            <!-- Desktop: Jobs by Day -->
+            <ng-container *ngIf="!isMobileView()">
+              <!-- Monday Jobs -->
+              <ng-container *ngFor="let job of getJobsForDay('Monday')">
+                <div class="p-4 border border-black/10 rounded-lg">
+                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
+                    {{ job.location }}
+                  </h3>
+                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
+                    {{ job.description }}
+                  </p>
+                  <button
+                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
+                    (click)="showJobDetails(job)"
+                  >
+                    Details
+                  </button>
+                </div>
+              </ng-container>
+
+              <!-- Tuesday Jobs -->
+              <ng-container *ngFor="let job of getJobsForDay('Tuesday')">
+                <div class="p-4 border border-black/10 rounded-lg">
+                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
+                    {{ job.location }}
+                  </h3>
+                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
+                    {{ job.description }}
+                  </p>
+                  <button
+                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
+                    (click)="showJobDetails(job)"
+                  >
+                    Details
+                  </button>
+                </div>
+              </ng-container>
+
+              <!-- Wednesday Jobs -->
+              <ng-container *ngFor="let job of getJobsForDay('Wednesday')">
+                <div class="p-4 border border-black/10 rounded-lg">
+                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
+                    {{ job.location }}
+                  </h3>
+                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
+                    {{ job.description }}
+                  </p>
+                  <button
+                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
+                    (click)="showJobDetails(job)"
+                  >
+                    Details
+                  </button>
+                </div>
+              </ng-container>
+
+              <!-- Thursday Jobs -->
+              <ng-container *ngFor="let job of getJobsForDay('Thursday')">
+                <div class="p-4 border border-black/10 rounded-lg">
+                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
+                    {{ job.location }}
+                  </h3>
+                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
+                    {{ job.description }}
+                  </p>
+                  <button
+                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
+                    (click)="showJobDetails(job)"
+                  >
+                    Details
+                  </button>
+                </div>
+              </ng-container>
+
+              <!-- Friday Jobs -->
+              <ng-container *ngFor="let job of getJobsForDay('Friday')">
+                <div class="p-4 border border-black/10 rounded-lg">
+                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
+                    {{ job.location }}
+                  </h3>
+                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
+                    {{ job.description }}
+                  </p>
+                  <button
+                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
+                    (click)="showJobDetails(job)"
+                  >
+                    Details
+                  </button>
+                </div>
+              </ng-container>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marquees Section -->
+      <div class="w-full sm:w-1/2 lg:flex-1 lg:min-w-[200px] lg:max-w-[272px] rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
+        <h2 class="font-inter text-sm font-semibold text-black mb-4">
+          To be prepared (Marquees)
+        </h2>
+        <div class="flex flex-col gap-6">
+          <div
+            *ngFor="let marquee of marquees"
+            class="flex justify-between items-center"
+          >
+            <span class="font-inter text-xs text-black">{{
+                marquee.size
+              }}</span>
+            <div class="w-3 h-3 rounded-sm bg-[#65558F]"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vehicle Section -->
+      <div class="w-full lg:w-[828px] rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
+          <h2 class="font-inter text-sm font-semibold text-black">
+            Vechile / Trailer Availability
+          </h2>
+          <div class="flex gap-4">
+            <span
+              class="font-inter text-sm text-black/40 cursor-pointer"
+              [class.text-black]="vehicleView === 'today'"
+              (click)="setVehicleView('today')"
+            >Today</span
+            >
+            <span
+              class="font-inter text-sm text-black/40 cursor-pointer"
+              [class.text-black]="vehicleView === 'weekly'"
+              (click)="setVehicleView('weekly')"
+            >Weekly</span
+            >
+          </div>
+        </div>
+
+        <div class="rounded-lg p-3 sm:p-4 bg-[#6750A4]">
+          <div *ngFor="let vehicle of vehicles" class="flex items-center gap-2 sm:gap-4 py-2 px-2 sm:px-4 overflow-hidden">
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center font-roboto text-base text-[#6750A4] bg-[#EADDFF]"
+            >
+              {{ vehicle.initial }}
+            </div>
+            <span class="font-roboto text-sm sm:text-base text-[#FEF7FF] truncate">{{vehicle.name}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
