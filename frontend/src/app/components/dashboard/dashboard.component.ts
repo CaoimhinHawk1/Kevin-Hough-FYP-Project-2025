@@ -6,11 +6,10 @@ import { ApiService } from '../../../services/api.service';
 import { NavigationService } from '../../../services/navigation.service';
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css'],
-  standalone: true,
-  imports: [CommonModule, FormsModule]
+    selector: 'app-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.css'],
+    imports: [CommonModule, FormsModule]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   events: any[] = [];

@@ -1,15 +1,9 @@
-<div class="relative overflow-hidden rounded-lg bg-cover bg-no-repeat p-12 text-center" [ngStyle]="{'background-image': 'url(assets/images/img.png)'}">
-  <div class="container mx-auto px-10 py-20 rounded-lg">
+<div class="relative min-h-[calc(100vh-56px)] overflow-hidden bg-cover bg-center bg-no-repeat" [ngStyle]="{'background-image': 'url(assets/images/img.png)'}">
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="container relative mx-auto px-6 py-32 h-full flex items-center justify-center">
     <div class="max-w-3xl mx-auto text-center">
-      <h1 class="text-5xl font-bold mb-6 text-white">Welcome to Marq'D</h1>
-      <p class="text-xl mb-8 text-white">This is your application homepage.</p>
-      <div class="space-x-4">
-        <button
-          routerLink="/dashboard"
-          class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-          Go to Dashboard
-        </button>
-      </div>
+      <h1 class="text-5xl font-bold mb-8 text-white">Welcome to Marq'D</h1>
+      <p class="text-xl mb-12 text-white">This is your application homepage.</p>
     </div>
   </div>
 </div>
