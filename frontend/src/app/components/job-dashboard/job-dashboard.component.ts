@@ -20,11 +20,10 @@ interface Vehicle {
 }
 
 @Component({
-  selector: "app-job-dashboard",
-  templateUrl: "./job-dashboard.component.html",
-  styleUrls: ["./job-dashboard.component.css"],
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+    selector: "app-job-dashboard",
+    templateUrl: "./job-dashboard.component.html",
+    styleUrls: ["./job-dashboard.component.css"],
+    imports: [CommonModule, FormsModule]
 })
 export class JobDashboardComponent implements OnInit {
   searchQuery: string = "";

@@ -5,11 +5,11 @@ import {AsyncPipe} from "@angular/common";
 
 @Component({
   selector: 'app-login',
-  standalone: true,
   templateUrl: './login.component.html',
   imports: [
     AsyncPipe
   ],
+  standalone: true,
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {

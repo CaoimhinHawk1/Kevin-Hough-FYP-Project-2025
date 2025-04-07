@@ -5,8 +5,8 @@ import { NavigationService } from "../../../services/navigation.service";
 import { Observable } from "rxjs";
 
 @Component({
-  selector: "app-header",
-  template: `
+    selector: "app-header",
+    template: `
     <header
       class="flex overflow-hidden flex-wrap gap-2 items-center p-1 bg-white border-b border-zinc-300 "
     >
@@ -48,8 +48,8 @@ import { Observable } from "rxjs";
       </div>
     </header>
   `,
-  styles: [
-    `
+    styles: [
+        `
       :host {
         display: contents;
         width: 100%;
@@ -59,9 +59,8 @@ import { Observable } from "rxjs";
         width: 100%;
       }
     `,
-  ],
-  standalone: true,
-  imports: [CommonModule, RouterLink],
+    ],
+    imports: [CommonModule, RouterLink]
 })
 export class HeaderComponent implements OnInit {
   isDashboard$: Observable<boolean>;
