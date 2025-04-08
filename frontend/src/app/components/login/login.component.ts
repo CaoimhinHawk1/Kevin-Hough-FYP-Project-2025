@@ -1,26 +1,41 @@
+// src/app/components/login/login.component.ts
 import { Component } from '@angular/core';
-import {AngularFireAuth} from "@angular/fire/compat/auth";
-import firebase from 'firebase/compat/app';
-import {AsyncPipe} from "@angular/common";
+import { AsyncPipe, NgIf } from '@angular/common';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  templateUrl: './login.component.html',
-  imports: [
-    AsyncPipe
-  ],
-  styleUrls: ['./login.component.css']
+  imports: [AsyncPipe, NgIf],
+  template: `
+    <ng-container *ngIf="authService.getCurrentUser() | async as user; else loginButton">
+      <button class="px-3 py-1 bg-gray-100 rounded text-sm">
+        {{ user.displayName || 'User' }} ▼
+      </button>
+      <button (click)="logout()" class="px-3 py-1 ml-2 bg-red-100 rounded text-sm">Logout</button>
+    </ng-container>
+    <ng-template #loginButton>
+      <button (click)="login()" class="px-3 py-1 bg-blue-100 rounded text-sm">Login</button>
+    </ng-template>
+  `,
+  styles: []
 })
 export class LoginComponent {
-  constructor(public auth: AngularFireAuth) { }
+  constructor(public authService: AuthService) {}
 
   login() {
-
-    this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    this.authService.login().then(() => {
+      console.log('Login successful, redirecting to dashboard');
+    }).catch(error => {
+      console.error('Login error:', error);
+    });
   }
 
   logout() {
-    this.auth.signOut();
+    this.authService.logout().then(() => {
+      console.log('Logout successful, redirecting to home');
+    }).catch(error => {
+      console.error('Logout error:', error);
+    });
   }
 }

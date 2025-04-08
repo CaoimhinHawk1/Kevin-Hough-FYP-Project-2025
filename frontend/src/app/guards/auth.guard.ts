@@ -1,25 +1,26 @@
-// frontend/src/app/guards/auth.guard.ts
+// src/app/guards/auth.guard.ts
 import { Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { Router } from '@angular/router';
+import { CanActivate, Router, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
+import { AuthService } from '../../services/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGuard {
-  constructor(private auth: AngularFireAuth, private router: Router) {}
+export class AuthGuard implements CanActivate {
+  constructor(private authService: AuthService, private router: Router) {}
 
-  canActivate(): Observable<boolean> {
-    return this.auth.authState.pipe(
+  canActivate(): Observable<boolean | UrlTree> {
+    return this.authService.isAuthenticated().pipe(
       take(1),
-      map(user => {
-        if (!user) {
-          this.router.navigate(['/home']);
-          return false;
+      map(isAuthenticated => {
+        if (isAuthenticated) {
+          return true;
+        } else {
+          // Redirect to login page if not authenticated
+          return this.router.createUrlTree(['/home']);
         }
-        return true;
       })
     );
   }

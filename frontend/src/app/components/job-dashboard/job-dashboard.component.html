@@ -1,37 +1,17 @@
-<div class="flex flex-col md:flex-row h-screen overflow-hidden bg-white">
+<!-- src/app/components/job-dashboard/job-dashboard.component.html -->
+<div class="flex flex-col md:flex-row h-screen overflow-hidden bg-white pt-[36px]">
   <!-- Sidebar -->
   <div class="w-full md:w-[212px] border-r border-black/10 p-4 flex flex-col gap-2 md:h-screen overflow-y-auto">
-    <!-- User Section -->
-    <div class="pb-3">
-      <div class="flex p-2 items-center gap-2">
-        <div class="w-6 h-6 rounded-full flex justify-center items-center">
-          <img src="assets/images/user.png" alt="User" class="w-6 h-6" />
-        </div>
-        <div class="font-inter text-sm text-black">USER</div>
-      </div>
-      <div class="h-px my-0.5"></div>
-    </div>
-
     <!-- Dashboards Section -->
     <div class="flex flex-col gap-1">
       <div class="px-3 py-1 text-black/40 font-inter text-sm">Dashboards</div>
       <div class="flex p-2 items-center gap-2 rounded-xl">
         <div class="flex justify-center items-center">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="chart-icon"
-          >
-            <path
-              d=""
-              fill="black"
-            ></path>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="" fill="black"></path>
           </svg>
         </div>
-        <div class="font-inter text-sm text-black">Overview</div>
+        <div class="font-inter text-sm text-black font-semibold bg-gray-200 rounded-full ">Overview</div>
       </div>
     </div>
 
@@ -41,23 +21,9 @@
       <div>
         <div class="flex p-2 items-center gap-2 rounded-xl">
           <div class="flex justify-center items-center">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              class="user-icon"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="" fill="black" fill-opacity="0.04"></path>
+              <path d="" fill="black"></path>
             </svg>
           </div>
           <div class="font-inter text-sm text-black">User Profile</div>
@@ -82,53 +48,10 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 sm:py-5 px-4 sm:px-7 border-b border-black/10">
       <!-- Left Side -->
       <div class="flex flex-wrap items-center gap-2 mb-3 sm:mb-0">
-        <!-- Action Buttons -->
-        <div class="flex gap-2">
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
-          </div>
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Breadcrumb -->
         <div class="flex items-center gap-2 overflow-x-auto">
           <div class="px-2 py-1 text-sm text-black/40">Dashboards</div>
           <span class="text-xs text-black/20">/</span>
-          <div class="px-2 py-1 text-sm text-black/40">Default</div>
+          <div class="px-2 py-1 text-sm text-black/40">Job Dashboard</div>
         </div>
       </div>
 
@@ -138,18 +61,8 @@
         <div class="flex items-center px-2 py-1 w-40 rounded-xl">
           <div class="flex items-center gap-2 flex-1">
             <div class="w-4 h-4">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d=""
-                  fill="black"
-                  fill-opacity="0.2"
-                ></path>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="" fill="black" fill-opacity="0.2"></path>
               </svg>
             </div>
             <input
@@ -160,291 +73,311 @@
               class="border-none text-sm text-black/20 font-inter outline-none bg-transparent"
             />
           </div>
-          <div
-            class="w-5 text-xs text-center text-black/20 border border-solid border-black/0 bg-white/20"
-          >
-            /
-          </div>
-        </div>
-
-        <!-- Action Icons -->
-        <div class="flex gap-2">
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
-          </div>
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
-          </div>
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
-          </div>
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
-          </div>
         </div>
       </div>
     </div>
 
     <!-- Dashboard Content -->
-    <div class="flex flex-wrap gap-4 sm:gap-7 p-3 sm:p-5">
-      <!-- Job Listings Section -->
-      <div class="w-full lg:flex-1 rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
-          <h2 class="font-inter text-sm font-semibold text-black">
-            Job Listings
-          </h2>
-          <div class="flex gap-4">
-            <span
-              class="font-inter text-sm text-black/40 cursor-pointer"
-              [class.text-black]="activeView === 'weekly'"
-              (click)="setActiveView('weekly')"
-            >Weekly</span
-            >
-            <span
-              class="font-inter text-sm text-black/40 cursor-pointer"
-              [class.text-black]="activeView === 'monthly'"
-              (click)="setActiveView('monthly')"
-            >Monthly</span
-            >
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-4">
-          <!-- Days Header -->
-          <div class="hidden md:flex justify-between overflow-x-auto">
-            <div *ngFor="let day of days" class="min-w-[100px] md:w-[162px] p-2 text-center font-inter text-base text-[#767676] border-b border-black/10">
-              {{ day }}
+    <div class="p-4 sm:p-6 flex flex-col gap-6">
+      <!-- Row 1: Calendar and Marquees side by side -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+        <!-- Job Listings Calendar Section - Takes 3/4 of row width -->
+        <div class="lg:col-span-3 rounded-2xl p-4 sm:p-6 bg-[#F9F9FA] min-h-[400px]">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
+            <h2 class="font-inter text-sm font-semibold text-black">
+              Job Listings
+            </h2>
+            <div class="flex gap-4">
+              <span
+                class="font-inter text-sm text-black/40 cursor-pointer"
+                [class.text-black]="activeView === 'weekly'"
+                (click)="setActiveView('weekly')"
+              >Weekly</span>
+              <span
+                class="font-inter text-sm text-black/40 cursor-pointer"
+                [class.text-black]="activeView === 'monthly'"
+                (click)="setActiveView('monthly')"
+              >Monthly</span>
             </div>
           </div>
 
-          <!-- Mobile Day Selector -->
-          <div class="md:hidden mb-4">
-            <select class="w-full p-2 border border-black/10 rounded-lg font-inter text-base" [(ngModel)]="selectedDay" name="daySelector">
-              <option *ngFor="let day of days" [value]="day">{{day}}</option>
-            </select>
+          <!-- Calendar Component -->
+          <div class="h-[calc(100%-40px)]">
+            <app-job-calendar
+              [view]="activeView"
+              [events]="jobListings"
+              (eventSelected)="handleEventSelected($event)">
+            </app-job-calendar>
           </div>
+        </div>
 
-          <!-- Job Cards Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <!-- Mobile: Jobs for Selected Day -->
-            <ng-container *ngIf="isMobileView()">
-              <ng-container *ngFor="let job of getJobsForDay(selectedDay)">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">{{job.location}}</h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">{{job.description}}</p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)">
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-            </ng-container>
+        <!-- Marquees Section -->
+        <div class="lg:col-span-1 rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
+          <h2 class="font-inter text-sm font-semibold text-black mb-4">
+            To be prepared (Marquees)
+          </h2>
+          <div class="flex flex-col gap-4">
+            <div
+              *ngFor="let marquee of marquees; let i = index"
+              class="flex justify-between items-center p-2 hover:bg-gray-100 rounded-lg"
+            >
+              <!-- Marquee info -->
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-sm bg-[#65558F]"></div>
+                <span class="font-inter text-sm text-black">{{ marquee.size }}</span>
+              </div>
 
-            <!-- Desktop: Jobs by Day -->
-            <ng-container *ngIf="!isMobileView()">
-              <!-- Monday Jobs -->
-              <ng-container *ngFor="let job of getJobsForDay('Monday')">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
-                    {{ job.location }}
-                  </h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
-                    {{ job.description }}
-                  </p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)"
-                  >
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-
-              <!-- Tuesday Jobs -->
-              <ng-container *ngFor="let job of getJobsForDay('Tuesday')">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
-                    {{ job.location }}
-                  </h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
-                    {{ job.description }}
-                  </p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)"
-                  >
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-
-              <!-- Wednesday Jobs -->
-              <ng-container *ngFor="let job of getJobsForDay('Wednesday')">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
-                    {{ job.location }}
-                  </h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
-                    {{ job.description }}
-                  </p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)"
-                  >
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-
-              <!-- Thursday Jobs -->
-              <ng-container *ngFor="let job of getJobsForDay('Thursday')">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
-                    {{ job.location }}
-                  </h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
-                    {{ job.description }}
-                  </p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)"
-                  >
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-
-              <!-- Friday Jobs -->
-              <ng-container *ngFor="let job of getJobsForDay('Friday')">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
-                    {{ job.location }}
-                  </h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
-                    {{ job.description }}
-                  </p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)"
-                  >
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-            </ng-container>
+              <!-- Assignment button -->
+              <button
+                class="px-3 py-1 text-xs rounded-md transition-colors duration-200 font-medium"
+                [class.bg-[#6750A4]]="marquee.assigned"
+                [class.text-white]="marquee.assigned"
+                [class.bg-gray-200]="!marquee.assigned"
+                [class.text-gray-700]="!marquee.assigned"
+                (click)="toggleMarqueeAssignment(i)"
+              >
+                {{ marquee.assigned ? 'Assigned to you' : 'Assign' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Marquees Section -->
-      <div class="w-full sm:w-1/2 lg:flex-1 lg:min-w-[200px] lg:max-w-[272px] rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
-        <h2 class="font-inter text-sm font-semibold text-black mb-4">
-          To be prepared (Marquees)
-        </h2>
-        <div class="flex flex-col gap-6">
-          <div
-            *ngFor="let marquee of marquees"
-            class="flex justify-between items-center"
-          >
-            <span class="font-inter text-xs text-black">{{
-                marquee.size
-              }}</span>
-            <div class="w-3 h-3 rounded-sm bg-[#65558F]"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Vehicle Section -->
-      <div class="w-full lg:w-[828px] rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
+      <!-- Row 2: Vehicle Section - Now properly in its own row -->
+      <div class="rounded-2xl p-4 sm:p-6 bg-[#F9F9FA] w-full">
         <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
           <h2 class="font-inter text-sm font-semibold text-black">
-            Vechile / Trailer Availability
+            Vehicle / Trailer Availability
           </h2>
           <div class="flex gap-4">
             <span
               class="font-inter text-sm text-black/40 cursor-pointer"
               [class.text-black]="vehicleView === 'today'"
               (click)="setVehicleView('today')"
-            >Today</span
-            >
+            >Today</span>
             <span
               class="font-inter text-sm text-black/40 cursor-pointer"
               [class.text-black]="vehicleView === 'weekly'"
               (click)="setVehicleView('weekly')"
-            >Weekly</span
-            >
+            >Weekly</span>
           </div>
         </div>
 
-        <div class="rounded-lg p-3 sm:p-4 bg-[#6750A4]">
-          <div *ngFor="let vehicle of vehicles" class="flex items-center gap-2 sm:gap-4 py-2 px-2 sm:px-4 overflow-hidden">
-            <div
-              class="w-10 h-10 rounded-full flex items-center justify-center font-roboto text-base text-[#6750A4] bg-[#EADDFF]"
-            >
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div *ngFor="let vehicle of vehicles; let i = index"
+               class="rounded-lg p-3 flex items-center justify-center flex-col gap-2"
+               [class.bg-[#6750A4]]="vehicle.available"
+               [class.bg-red-500]="!vehicle.available">
+
+            <!-- Vehicle initial -->
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-roboto text-base"
+                 [class.text-[#6750A4]]="vehicle.available"
+                 [class.bg-[#EADDFF]]="vehicle.available"
+                 [class.text-red-500]="!vehicle.available"
+                 [class.bg-red-200]="!vehicle.available">
               {{ vehicle.initial }}
             </div>
-            <span class="font-roboto text-sm sm:text-base text-[#FEF7FF] truncate">{{vehicle.name}}</span>
+
+            <!-- Vehicle name with conditional strikethrough -->
+            <span class="font-roboto text-sm text-[#FEF7FF] text-center truncate"
+                  [class.line-through]="!vehicle.available">
+              {{ vehicle.name }}
+            </span>
+
+            <!-- Status indicator -->
+            <span class="text-xs text-white px-2 py-0.5 rounded-full"
+                  [class.bg-green-600]="vehicle.available"
+                  [class.bg-red-700]="!vehicle.available">
+              {{ vehicle.available ? 'Available' : 'In Use' }}
+            </span>
           </div>
+        </div>
+
+      </div>
+      <!-- Inventory Management Section -->
+      <div class="rounded-2xl p-4 sm:p-6 bg-[#F9F9FA] w-full">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-6">
+          <h2 class="font-inter text-sm font-semibold text-black">
+            Inventory Management
+          </h2>
+
+          <!-- Tabs for inventory sections -->
+          <div class="flex space-x-3 bg-gray-200 p-1 rounded-lg">
+            <button
+              class="px-3 py-1 text-xs rounded-md transition-colors duration-200 text-center min-w-[80px]"
+              [class.bg-[#6750A4]]="activeInventoryTab === 'consumables'"
+              [class.text-white]="activeInventoryTab === 'consumables'"
+              [class.bg-transparent]="activeInventoryTab !== 'consumables'"
+              [class.text-gray-700]="activeInventoryTab !== 'consumables'"
+              (click)="setActiveInventoryTab('consumables')"
+            >
+              Consumables
+            </button>
+            <button
+              class="px-3 py-1 text-xs rounded-md transition-colors duration-200 text-center min-w-[80px]"
+              [class.bg-[#6750A4]]="activeInventoryTab === 'maintenance'"
+              [class.text-white]="activeInventoryTab === 'maintenance'"
+              [class.bg-transparent]="activeInventoryTab !== 'maintenance'"
+              [class.text-gray-700]="activeInventoryTab !== 'maintenance'"
+              (click)="setActiveInventoryTab('maintenance')"
+            >
+              Maintenance
+            </button>
+            <button
+              class="px-3 py-1 text-xs rounded-md transition-colors duration-200 text-center min-w-[80px]"
+              [class.bg-[#6750A4]]="activeInventoryTab === 'equipment'"
+              [class.text-white]="activeInventoryTab === 'equipment'"
+              [class.bg-transparent]="activeInventoryTab !== 'equipment'"
+              [class.text-gray-700]="activeInventoryTab !== 'equipment'"
+              (click)="setActiveInventoryTab('equipment')"
+            >
+              Equipment
+            </button>
+          </div>
+        </div>
+
+        <!-- Consumables Tab -->
+        <div *ngIf="activeInventoryTab === 'consumables'" class="border rounded-lg overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let item of inventoryItems">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">{{ item.name }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ item.quantity }} {{ item.unit }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                  [class.bg-green-100]="item.status === 'available'"
+                  [class.text-green-800]="item.status === 'available'"
+                  [class.bg-yellow-100]="item.status === 'low'"
+                  [class.text-yellow-800]="item.status === 'low'"
+                  [class.bg-red-100]="item.status === 'out'"
+                  [class.text-red-800]="item.status === 'out'">
+              {{ item.status === 'available' ? 'In Stock' : item.status === 'low' ? 'Low Stock' : 'Out of Stock' }}
+            </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <button class="text-indigo-600 hover:text-indigo-900">
+                  Reorder
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Maintenance Tab -->
+        <div *ngIf="activeInventoryTab === 'maintenance'" class="border rounded-lg overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equipment</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Service</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Next Service</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let item of maintenanceItems">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">{{ item.equipmentName }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ item.lastMaintenance | date:'MMM d, y' }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ item.nextMaintenance | date:'MMM d, y' }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                  [class.bg-green-100]="item.status === 'upcoming'"
+                  [class.text-green-800]="item.status === 'upcoming'"
+                  [class.bg-yellow-100]="item.status === 'due'"
+                  [class.text-yellow-800]="item.status === 'due'"
+                  [class.bg-red-100]="item.status === 'overdue'"
+                  [class.text-red-800]="item.status === 'overdue'"
+                  [class.bg-blue-100]="item.status === 'in-progress'"
+                  [class.text-blue-800]="item.status === 'in-progress'">
+              {{ item.status | titlecase }}
+            </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <button class="text-indigo-600 hover:text-indigo-900">
+                  Schedule
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Equipment Tab -->
+        <div *ngIf="activeInventoryTab === 'equipment'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div *ngFor="let item of equipmentUsage"
+               class="bg-white rounded-lg border overflow-hidden shadow-sm">
+            <div class="px-4 py-3 border-b bg-gray-50">
+              <h3 class="text-sm font-medium text-gray-700">{{ item.name }}</h3>
+              <span class="text-xs text-gray-500">{{ item.category | titlecase }}</span>
+            </div>
+
+            <div class="p-4">
+              <!-- Usage Bars -->
+              <div class="mb-2">
+                <div class="flex justify-between mb-1">
+                  <span class="text-xs text-gray-600">In Use: {{ item.inUse }}</span>
+                  <span class="text-xs text-gray-600">{{ (item.inUse / item.totalUnits * 100).toFixed(0) }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                  <div class="bg-[#6750A4] h-1.5 rounded-full"
+                       [style.width]="(item.inUse / item.totalUnits * 100) + '%'"></div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <div class="flex justify-between mb-1">
+                  <span class="text-xs text-gray-600">Available: {{ item.available }}</span>
+                  <span class="text-xs text-gray-600">{{ (item.available / item.totalUnits * 100).toFixed(0) }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                  <div class="bg-green-500 h-1.5 rounded-full"
+                       [style.width]="(item.available / item.totalUnits * 100) + '%'"></div>
+                </div>
+              </div>
+
+              <!-- Status Badge -->
+              <div class="mt-3 flex items-center justify-between">
+          <span class="text-xs rounded-full px-2 py-1"
+                [class.bg-green-100]="item.available > 0"
+                [class.text-green-800]="item.available > 0"
+                [class.bg-red-100]="item.available === 0"
+                [class.text-red-800]="item.available === 0">
+            {{ item.available > 0 ? 'Available' : 'All In Use' }}
+          </span>
+                <span class="text-xs text-gray-500">Total: {{ item.totalUnits }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="mt-4 flex justify-end space-x-3">
+          <button class="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+            Print Inventory
+          </button>
+          <button class="px-3 py-1 text-sm bg-[#6750A4] text-white rounded hover:bg-purple-700">
+            Add New Item
+          </button>
         </div>
       </div>
     </div>
