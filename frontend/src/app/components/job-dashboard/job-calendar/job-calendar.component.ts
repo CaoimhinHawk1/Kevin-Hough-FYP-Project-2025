@@ -18,10 +18,9 @@ interface CalendarWeek {
 }
 
 @Component({
-  selector: 'app-job-calendar',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule],
-  template: `
+    selector: 'app-job-calendar',
+    imports: [CommonModule, FormsModule, MatDialogModule],
+    template: `
     <div class="calendar-container bg-white rounded-lg shadow h-full">
       <!-- Calendar Header - Fixed at top -->
       <div class="calendar-header flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 sm:p-4 border-b gap-2 sm:gap-0">
@@ -136,7 +135,7 @@ interface CalendarWeek {
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .calendar-container {
       width: 100%;
       height: 100%;

@@ -6,8 +6,8 @@ import { Observable } from "rxjs";
 import { LoginComponent } from "../login/login.component";
 
 @Component({
-  selector: "app-header",
-  template: `
+    selector: "app-header",
+    template: `
     <header
       class="fixed top-0 left-0 right-0 z-50 flex overflow-hidden flex-wrap gap-2 items-center p-1 bg-white border-b border-zinc-300"
     >
@@ -32,8 +32,8 @@ import { LoginComponent } from "../login/login.component";
       </div>
     </header>
   `,
-  styles: [
-    `
+    styles: [
+        `
       :host {
         display: block;
         height: 56px;
@@ -43,9 +43,8 @@ import { LoginComponent } from "../login/login.component";
         width: 100%;
       }
     `,
-  ],
-  standalone: true,
-  imports: [CommonModule, RouterLink, LoginComponent]
+    ],
+    imports: [CommonModule, RouterLink, LoginComponent]
 })
 export class HeaderComponent implements OnInit {
   isDashboard$: Observable<boolean>;

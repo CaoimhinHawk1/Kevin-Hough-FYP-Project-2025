@@ -12,20 +12,19 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatCardModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatDividerModule
-  ],
-  template: `
+    selector: 'app-login',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatButtonModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatCardModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        MatDividerModule
+    ],
+    template: `
     <div class="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] p-4 bg-gray-50">
       <mat-card class="w-full max-w-md p-6">
         <mat-card-header class="justify-center mb-4">
@@ -101,7 +100,7 @@ import { MatDividerModule } from '@angular/material/divider';
       </mat-card>
     </div>
   `,
-  styles: [`
+    styles: [`
     :host {
       display: block;
     }

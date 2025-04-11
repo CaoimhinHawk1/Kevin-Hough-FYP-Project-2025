@@ -7,15 +7,14 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
-  standalone: true,
-  imports: [
-    RouterOutlet,
-    HeaderComponent,
-    MatButtonModule
-  ]
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css'],
+    imports: [
+        RouterOutlet,
+        HeaderComponent,
+        MatButtonModule
+    ]
 })
 export class AppComponent implements OnInit {
   title = 'KevinFYPProject2025';

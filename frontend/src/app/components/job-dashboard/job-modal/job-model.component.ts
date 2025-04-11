@@ -15,10 +15,9 @@ interface JobModalData {
 }
 
 @Component({
-  selector: "app-modal",
-  standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule],
-  template: `
+    selector: "app-modal",
+    imports: [CommonModule, MatDialogModule, MatButtonModule],
+    template: `
     <div class="p-6 max-w-2xl">
       <h2 class="text-xl font-bold mb-4">{{ data.title }}</h2>
 

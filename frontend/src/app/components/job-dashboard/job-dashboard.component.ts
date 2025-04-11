@@ -42,11 +42,10 @@ interface Vehicle {
 }
 
 @Component({
-  selector: "app-job-dashboard",
-  templateUrl: "./job-dashboard.component.html",
-  styleUrls: ["./job-dashboard.component.css"],
-  standalone: true,
-  imports: [CommonModule, FormsModule, JobCalendarComponent],
+    selector: "app-job-dashboard",
+    templateUrl: "./job-dashboard.component.html",
+    styleUrls: ["./job-dashboard.component.css"],
+    imports: [CommonModule, FormsModule, JobCalendarComponent]
 })
 export class JobDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

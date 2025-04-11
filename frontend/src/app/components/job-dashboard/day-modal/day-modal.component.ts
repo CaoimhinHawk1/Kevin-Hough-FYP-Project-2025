@@ -13,10 +13,9 @@ interface DialogData {
 }
 
 @Component({
-  selector: 'app-day-modal',
-  standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule],
-  template: `
+    selector: 'app-day-modal',
+    imports: [CommonModule, MatDialogModule, MatButtonModule],
+    template: `
     <div class="p-6 max-w-lg">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold" [class.text-blue-600]="data.isToday">{{ data.title }}</h2>
@@ -85,7 +84,7 @@ interface DialogData {
       </div>
     </div>
   `,
-  styles: []
+    styles: []
 })
 export class DayModalComponent {
   constructor(
