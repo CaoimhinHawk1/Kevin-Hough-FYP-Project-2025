@@ -1,449 +1,503 @@
 <div class="flex flex-col md:flex-row h-screen overflow-hidden bg-white">
-  <!-- Sidebar -->
-  <div class="w-full md:w-[212px] border-r border-black/10 p-4 flex flex-col gap-2 md:h-screen overflow-y-auto">
-    <!-- User Section -->
-    <div class="pb-3">
-      <div class="flex p-2 items-center gap-2">
-        <div class="w-6 h-6 rounded-full flex justify-center items-center">
-          <img src="assets/images/user.png" alt="User" class="w-6 h-6" />
-        </div>
-        <div class="font-inter text-sm text-black">USER</div>
-      </div>
-      <div class="h-px my-0.5"></div>
+  <!-- Mobile Navigation Header - Only visible on small screens -->
+  <div class="md:hidden flex justify-between items-center px-4 py-3 border-b border-black/10 sticky top-0 z-20 bg-white">
+    <div class="font-inter text-lg font-semibold">Job Dashboard</div>
+    <button class="p-2" (click)="toggleMobileMenu()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Sidebar Overlay - Only appears when menu is open -->
+  <div *ngIf="mobileMenuOpen" class="md:hidden fixed inset-0 bg-black/50 z-30" (click)="toggleMobileMenu()"></div>
+
+  <!-- Mobile Sidebar - Completely separate from page flow -->
+  <div *ngIf="mobileMenuOpen" class="md:hidden fixed top-0 left-0 z-40 w-[240px] h-full bg-white shadow-lg overflow-y-auto">
+    <!-- Mobile Sidebar Header -->
+    <div class="flex justify-between items-center p-4 border-b border-black/10">
+      <div class="font-inter text-lg font-semibold">Menu</div>
+      <button class="p-2" (click)="toggleMobileMenu()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
 
-    <!-- Dashboards Section -->
-    <div class="flex flex-col gap-1">
-      <div class="px-3 py-1 text-black/40 font-inter text-sm">Dashboards</div>
-      <div class="flex p-2 items-center gap-2 rounded-xl">
-        <div class="flex justify-center items-center">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="chart-icon"
-          >
-            <path
-              d=""
-              fill="black"
-            ></path>
-          </svg>
-        </div>
-        <div class="font-inter text-sm text-black">Overview</div>
-      </div>
-    </div>
-
-    <!-- Pages Section -->
-    <div class="flex flex-col gap-1">
-      <div class="px-3 py-1 text-black/40 font-inter text-sm">Pages</div>
-      <div>
+    <!-- Mobile Sidebar Content -->
+    <div class="p-4 flex flex-col gap-2">
+      <!-- Dashboards Section -->
+      <div class="flex flex-col gap-1">
+        <div class="px-3 py-1 text-black/40 font-inter text-sm">Dashboards</div>
         <div class="flex p-2 items-center gap-2 rounded-xl">
           <div class="flex justify-center items-center">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              class="user-icon"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="" fill="black"></path>
             </svg>
           </div>
-          <div class="font-inter text-sm text-black">User Profile</div>
+          <div class="font-inter text-sm text-black font-semibold bg-gray-200 rounded-full px-2">Overview</div>
         </div>
-        <div class="p-2 font-inter text-sm text-black rounded-xl">Overview</div>
-        <div class="p-2 font-inter text-sm text-black rounded-xl">
-          Job Listings
-        </div>
-        <div class="p-2 font-inter text-sm text-black rounded-xl">
-          Campaigns
-        </div>
-        <div class="p-2 font-inter text-sm text-black rounded-xl">
-          Notifications
+      </div>
+
+      <!-- Pages Section -->
+      <div class="flex flex-col gap-1">
+        <div class="px-3 py-1 text-black/40 font-inter text-sm">Pages</div>
+        <div>
+          <div class="flex p-2 items-center gap-2 rounded-xl">
+            <div class="flex justify-center items-center">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="" fill="black" fill-opacity="0.04"></path>
+                <path d="" fill="black"></path>
+              </svg>
+            </div>
+            <div class="font-inter text-sm text-black">User Profile</div>
+          </div>
+          <div class="p-2 font-inter text-sm text-black rounded-xl hover:bg-gray-100">Overview</div>
+          <div class="p-2 font-inter text-sm text-black rounded-xl hover:bg-gray-100">
+            Job Listings
+          </div>
+          <div class="p-2 font-inter text-sm text-black rounded-xl hover:bg-gray-100">
+            Campaigns
+          </div>
+          <div class="p-2 font-inter text-sm text-black rounded-xl hover:bg-gray-100">
+            Notifications
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div class="flex-1 flex flex-col overflow-y-auto">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 sm:py-5 px-4 sm:px-7 border-b border-black/10">
-      <!-- Left Side -->
-      <div class="flex flex-wrap items-center gap-2 mb-3 sm:mb-0">
-        <!-- Action Buttons -->
-        <div class="flex gap-2">
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
+  <!-- Main Content Layout -->
+  <div class="flex flex-col md:flex-row h-[calc(100vh-48px)] md:h-screen overflow-hidden">
+    <!-- Desktop Sidebar (hidden on mobile) -->
+    <div class="hidden md:block md:w-[212px] border-r border-black/10 p-4 flex-col gap-2 overflow-y-auto bg-white">
+      <!-- Dashboards Section -->
+      <div class="flex flex-col gap-1">
+        <div class="px-3 py-1 text-black/40 font-inter text-sm">Dashboards</div>
+        <div class="flex p-2 items-center gap-2 rounded-xl">
+          <div class="flex justify-center items-center">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="" fill="black"></path>
             </svg>
           </div>
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Breadcrumb -->
-        <div class="flex items-center gap-2 overflow-x-auto">
-          <div class="px-2 py-1 text-sm text-black/40">Dashboards</div>
-          <span class="text-xs text-black/20">/</span>
-          <div class="px-2 py-1 text-sm text-black/40">Default</div>
+          <div class="font-inter text-sm text-black font-semibold bg-gray-200 rounded-full px-2">Overview</div>
         </div>
       </div>
 
-      <!-- Right Side -->
-      <div class="flex flex-wrap items-center gap-3 sm:gap-5">
-        <!-- Search -->
-        <div class="flex items-center px-2 py-1 w-40 rounded-xl">
-          <div class="flex items-center gap-2 flex-1">
-            <div class="w-4 h-4">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d=""
-                  fill="black"
-                  fill-opacity="0.2"
-                ></path>
+      <!-- Pages Section -->
+      <div class="flex flex-col gap-1">
+        <div class="px-3 py-1 text-black/40 font-inter text-sm">Pages</div>
+        <div>
+          <div class="flex p-2 items-center gap-2 rounded-xl">
+            <div class="flex justify-center items-center">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="" fill="black" fill-opacity="0.04"></path>
+                <path d="" fill="black"></path>
               </svg>
             </div>
-            <input
-              type="text"
-              placeholder="Search"
-              [(ngModel)]="searchQuery"
-              name="searchQuery"
-              class="border-none text-sm text-black/20 font-inter outline-none bg-transparent"
-            />
+            <div class="font-inter text-sm text-black">User Profile</div>
           </div>
-          <div
-            class="w-5 text-xs text-center text-black/20 border border-solid border-black/0 bg-white/20"
-          >
-            /
+          <div class="p-2 font-inter text-sm text-black rounded-xl hover:bg-gray-100">Overview</div>
+          <div class="p-2 font-inter text-sm text-black rounded-xl hover:bg-gray-100">
+            Job Listings
           </div>
-        </div>
-
-        <!-- Action Icons -->
-        <div class="flex gap-2">
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
+          <div class="p-2 font-inter text-sm text-black rounded-xl hover:bg-gray-100">
+            Campaigns
           </div>
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
-          </div>
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
-          </div>
-          <div class="p-1 rounded-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d=""
-                fill="black"
-                fill-opacity="0.04"
-              ></path>
-              <path
-                d=""
-                fill="black"
-              ></path>
-            </svg>
+          <div class="p-2 font-inter text-sm text-black rounded-xl hover:bg-gray-100">
+            Notifications
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Dashboard Content -->
-    <div class="flex flex-wrap gap-4 sm:gap-7 p-3 sm:p-5">
-      <!-- Job Listings Section -->
-      <div class="w-full lg:flex-1 rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
-          <h2 class="font-inter text-sm font-semibold text-black">
-            Job Listings
-          </h2>
-          <div class="flex gap-4">
-            <span
-              class="font-inter text-sm text-black/40 cursor-pointer"
-              [class.text-black]="activeView === 'weekly'"
-              (click)="setActiveView('weekly')"
-            >Weekly</span
-            >
-            <span
-              class="font-inter text-sm text-black/40 cursor-pointer"
-              [class.text-black]="activeView === 'monthly'"
-              (click)="setActiveView('monthly')"
-            >Monthly</span
-            >
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+      <!-- Header - Hidden on mobile as we have a dedicated mobile header -->
+      <div class="hidden md:flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 sm:py-5 px-4 sm:px-7 border-b border-black/10">
+        <!-- Left Side -->
+        <div class="flex flex-wrap items-center gap-2 mb-3 sm:mb-0">
+          <div class="flex items-center gap-2 overflow-x-auto">
+            <div class="px-2 py-1 text-sm text-black/40">Dashboards</div>
+            <span class="text-xs text-black/20">/</span>
+            <div class="px-2 py-1 text-sm text-black/40">Job Dashboard</div>
           </div>
         </div>
 
-        <div class="flex flex-col gap-4">
-          <!-- Days Header -->
-          <div class="hidden md:flex justify-between overflow-x-auto">
-            <div *ngFor="let day of days" class="min-w-[100px] md:w-[162px] p-2 text-center font-inter text-base text-[#767676] border-b border-black/10">
-              {{ day }}
+        <!-- Right Side -->
+        <div class="flex flex-wrap items-center gap-3 sm:gap-5">
+          <!-- Search -->
+          <div class="flex items-center px-2 py-1 w-40 rounded-xl">
+            <div class="flex items-center gap-2 flex-1">
+              <div class="w-4 h-4">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="" fill="black" fill-opacity="0.2"></path>
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Search"
+                [(ngModel)]="searchQuery"
+                name="searchQuery"
+                class="border-none text-sm text-black/20 font-inter outline-none bg-transparent"
+              />
             </div>
-          </div>
-
-          <!-- Mobile Day Selector -->
-          <div class="md:hidden mb-4">
-            <select class="w-full p-2 border border-black/10 rounded-lg font-inter text-base" [(ngModel)]="selectedDay" name="daySelector">
-              <option *ngFor="let day of days" [value]="day">{{day}}</option>
-            </select>
-          </div>
-
-          <!-- Job Cards Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <!-- Mobile: Jobs for Selected Day -->
-            <ng-container *ngIf="isMobileView()">
-              <ng-container *ngFor="let job of getJobsForDay(selectedDay)">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">{{job.location}}</h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">{{job.description}}</p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)">
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-            </ng-container>
-
-            <!-- Desktop: Jobs by Day -->
-            <ng-container *ngIf="!isMobileView()">
-              <!-- Monday Jobs -->
-              <ng-container *ngFor="let job of getJobsForDay('Monday')">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
-                    {{ job.location }}
-                  </h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
-                    {{ job.description }}
-                  </p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)"
-                  >
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-
-              <!-- Tuesday Jobs -->
-              <ng-container *ngFor="let job of getJobsForDay('Tuesday')">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
-                    {{ job.location }}
-                  </h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
-                    {{ job.description }}
-                  </p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)"
-                  >
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-
-              <!-- Wednesday Jobs -->
-              <ng-container *ngFor="let job of getJobsForDay('Wednesday')">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
-                    {{ job.location }}
-                  </h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
-                    {{ job.description }}
-                  </p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)"
-                  >
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-
-              <!-- Thursday Jobs -->
-              <ng-container *ngFor="let job of getJobsForDay('Thursday')">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
-                    {{ job.location }}
-                  </h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
-                    {{ job.description }}
-                  </p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)"
-                  >
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-
-              <!-- Friday Jobs -->
-              <ng-container *ngFor="let job of getJobsForDay('Friday')">
-                <div class="p-4 border border-black/10 rounded-lg">
-                  <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
-                    {{ job.location }}
-                  </h3>
-                  <p class="font-inter text-base text-[#1E1E1E] mb-2">
-                    {{ job.description }}
-                  </p>
-                  <button
-                    class="text-white border-none rounded-lg py-2 px-4 font-inter text-base bg-[#6750A4]"
-                    (click)="showJobDetails(job)"
-                  >
-                    Details
-                  </button>
-                </div>
-              </ng-container>
-            </ng-container>
           </div>
         </div>
       </div>
 
-      <!-- Marquees Section -->
-      <div class="w-full sm:w-1/2 lg:flex-1 lg:min-w-[200px] lg:max-w-[272px] rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
-        <h2 class="font-inter text-sm font-semibold text-black mb-4">
-          To be prepared (Marquees)
-        </h2>
-        <div class="flex flex-col gap-6">
-          <div
-            *ngFor="let marquee of marquees"
-            class="flex justify-between items-center"
+      <!-- Mobile Search Bar -->
+      <div class="md:hidden flex items-center px-4 py-2 border-b border-black/10">
+        <div class="flex items-center gap-2 flex-1 bg-gray-100 rounded-lg px-3 py-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search"
+            [(ngModel)]="searchQuery"
+            name="searchQuery"
+            class="border-none text-sm text-black/70 font-inter outline-none bg-transparent w-full"
+          />
+        </div>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div class="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-6">
+        <!-- Main page loading state -->
+        <div *ngIf="loading && !error" class="flex-1 flex justify-center items-center">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6750A4] mb-4 mx-auto"></div>
+            <p class="text-gray-600">Loading dashboard data...</p>
+          </div>
+        </div>
+
+        <!-- Error state -->
+        <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
+          <h3 class="font-medium mb-2">Error Loading Dashboard</h3>
+          <p>{{ error }}</p>
+          <button
+            (click)="loadData()"
+            class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
           >
-            <span class="font-inter text-xs text-black">{{
-                marquee.size
-              }}</span>
-            <div class="w-3 h-3 rounded-sm bg-[#65558F]"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Vehicle Section -->
-      <div class="w-full lg:w-[828px] rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
-          <h2 class="font-inter text-sm font-semibold text-black">
-            Vechile / Trailer Availability
-          </h2>
-          <div class="flex gap-4">
-            <span
-              class="font-inter text-sm text-black/40 cursor-pointer"
-              [class.text-black]="vehicleView === 'today'"
-              (click)="setVehicleView('today')"
-            >Today</span
-            >
-            <span
-              class="font-inter text-sm text-black/40 cursor-pointer"
-              [class.text-black]="vehicleView === 'weekly'"
-              (click)="setVehicleView('weekly')"
-            >Weekly</span
-            >
-          </div>
+            Try Again
+          </button>
         </div>
 
-        <div class="rounded-lg p-3 sm:p-4 bg-[#6750A4]">
-          <div *ngFor="let vehicle of vehicles" class="flex items-center gap-2 sm:gap-4 py-2 px-2 sm:px-4 overflow-hidden">
-            <div
-              class="w-10 h-10 rounded-full flex items-center justify-center font-roboto text-base text-[#6750A4] bg-[#EADDFF]"
-            >
-              {{ vehicle.initial }}
+        <!-- Dashboard content when loaded -->
+        <ng-container *ngIf="!loading && !error">
+          <!-- Row 1: Calendar and Marquees side by side -->
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+            <!-- Job Listings Calendar Section - Takes 3/4 of row width on large screens, full width on mobile -->
+            <div class="lg:col-span-3 rounded-2xl p-4 sm:p-6 bg-[#F9F9FA] min-h-[300px] sm:min-h-[400px]">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+                <h2 class="font-inter text-sm font-semibold text-black">
+                  Job Listings
+                </h2>
+                <div class="flex gap-4 p-1 bg-gray-200 rounded-lg self-start sm:self-auto">
+                  <span
+                    class="font-inter text-sm px-3 py-1 cursor-pointer rounded-md transition-colors duration-200"
+                    [class.text-white]="activeView === 'weekly'"
+                    [class.bg-[#6750A4]]="activeView === 'weekly'"
+                    [class.text-gray-700]="activeView !== 'weekly'"
+                    (click)="setActiveView('weekly')"
+                  >Weekly</span>
+                  <span
+                    class="font-inter text-sm px-3 py-1 cursor-pointer rounded-md transition-colors duration-200"
+                    [class.text-white]="activeView === 'monthly'"
+                    [class.bg-[#6750A4]]="activeView === 'monthly'"
+                    [class.text-gray-700]="activeView !== 'monthly'"
+                    (click)="setActiveView('monthly')"
+                  >Monthly</span>
+                </div>
+              </div>
+
+              <!-- Calendar Component -->
+              <div class="h-[calc(100%-40px)]">
+                <app-job-calendar
+                  [view]="activeView"
+                  [events]="jobListings"
+                  (eventSelected)="handleEventSelected($event)">
+                </app-job-calendar>
+              </div>
             </div>
-            <span class="font-roboto text-sm sm:text-base text-[#FEF7FF] truncate">{{vehicle.name}}</span>
+
+            <!-- Marquees Section -->
+            <div class="lg:col-span-1 rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
+              <h2 class="font-inter text-sm font-semibold text-black mb-4">
+                To be prepared (Marquees)
+              </h2>
+              <div *ngIf="loading" class="flex justify-center py-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#6750A4]"></div>
+              </div>
+              <div *ngIf="error" class="text-red-500 text-sm mb-4">
+                {{ error }}
+              </div>
+              <div class="flex flex-col gap-4">
+                <div
+                  *ngFor="let marquee of marquees; let i = index"
+                  class="flex justify-between items-center p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <!-- Marquee info -->
+                  <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-sm bg-[#65558F]"></div>
+                    <span class="font-inter text-sm text-black">{{ marquee.size }}</span>
+                  </div>
+
+                  <!-- Assignment button -->
+                  <button
+                    class="px-3 py-1 text-xs rounded-md transition-colors duration-200 font-medium"
+                    [class.bg-[#6750A4]]="marquee.assigned"
+                    [class.text-white]="marquee.assigned"
+                    [class.bg-gray-200]="!marquee.assigned"
+                    [class.text-gray-700]="!marquee.assigned"
+                    (click)="toggleMarqueeAssignment(i)"
+                  >
+                    {{ marquee.assigned ? 'Assigned' : 'Assign' }}
+                  </button>
+                </div>
+
+                <!-- Empty state for marquees -->
+                <div *ngIf="!loading && marquees.length === 0" class="text-center py-4 text-gray-500">
+                  No marquees available
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Vehicle Section -->
+          <div *ngIf="!loading && vehicles.length > 0" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <div *ngFor="let vehicle of vehicles; let i = index"
+                 class="rounded-lg p-2 md:p-3 flex items-center justify-center flex-col gap-2"
+                 [class.bg-[#6750A4]]="vehicle.available"
+                 [class.bg-red-500]="!vehicle.available">
+
+              <!-- Vehicle initial -->
+              <div class="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-roboto text-sm md:text-base"
+                   [class.text-[#6750A4]]="vehicle.available"
+                   [class.bg-[#EADDFF]]="vehicle.available"
+                   [class.text-red-500]="!vehicle.available"
+                   [class.bg-red-200]="!vehicle.available">
+                {{ vehicle.initial }}
+              </div>
+
+              <!-- Vehicle name with conditional strikethrough -->
+              <span class="font-roboto text-xs md:text-sm text-[#FEF7FF] text-center truncate max-w-full px-1"
+                    [class.line-through]="!vehicle.available">
+              {{ vehicle.name }}
+            </span>
+
+              <!-- Status indicator -->
+              <span class="text-xs text-white px-2 py-0.5 rounded-full"
+                    [class.bg-green-600]="vehicle.available"
+                    [class.bg-red-700]="!vehicle.available">
+              {{ vehicle.available ? 'Available' : 'In Use' }}
+            </span>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!loading && vehicles.length === 0" class="flex flex-col items-center justify-center py-8 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16v-4a4 4 0 018 0v4a4 4 0 01-8 0z" />
+              <rect x="6" y="10" width="12" height="10" rx="2" />
+            </svg>
+            <h3 class="font-medium text-gray-900 mb-1">No vehicles found</h3>
+            <p class="text-gray-500">There are no vehicles available in the system.</p>
+          </div>
+
+            <!-- Loading and Error States -->
+            <div *ngIf="loading" class="flex justify-center py-8">
+              <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6750A4]"></div>
+            </div>
+
+            <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg mb-4">
+              {{ error }}
+            </div>
+
+            <!-- Vehicle Grid -->
+            <div *ngIf="!loading && vehicles.length > 0" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              <div *ngFor="let vehicle of vehicles; let i = index"
+                   class="rounded-lg p-2 md:p-3 flex items-center justify-center flex-col gap-2"
+                   [class.bg-[#6750A4]]="vehicle.available"
+                   [class.bg-red-500]="!vehicle.available">
+
+                <!-- Vehicle initial -->
+                <div class="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-roboto text-sm md:text-base"
+                     [class.text-[#6750A4]]="vehicle.available"
+                     [class.bg-[#EADDFF]]="vehicle.available"
+                     [class.text-red-500]="!vehicle.available"
+                     [class.bg-red-200]="!vehicle.available">
+                  {{ vehicle.initial }}
+                </div>
+
+                <!-- Vehicle name with conditional strikethrough -->
+                <span class="font-roboto text-xs md:text-sm text-[#FEF7FF] text-center truncate max-w-full px-1"
+                      [class.line-through]="!vehicle.available">
+                  {{ vehicle.name }}
+                </span>
+
+                <!-- Status indicator -->
+                <span class="text-xs text-white px-2 py-0.5 rounded-full"
+                      [class.bg-green-600]="vehicle.available"
+                      [class.bg-red-700]="!vehicle.available">
+                  {{ vehicle.available ? 'Available' : 'In Use' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loading && vehicles.length === 0" class="flex flex-col items-center justify-center py-8 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16v-4a4 4 0 018 0v4a4 4 0 01-8 0z" />
+                <rect x="6" y="10" width="12" height="10" rx="2" />
+              </svg>
+              <h3 class="font-medium text-gray-900 mb-1">No vehicles found</h3>
+              <p class="text-gray-500">There are no vehicles available in the system.</p>
+            </div>
+
+          <!-- Add New Button - FAB -->
+          <button
+            (click)="createNewEvent()"
+            class="fixed bottom-6 right-6 p-4 bg-[#6750A4] text-white rounded-full shadow-lg hover:bg-purple-700 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </ng-container>
+
+        <div class="w-full lg:flex-1 rounded-2xl p-4 sm:p-6 bg-[#F9F9FA]">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+            <h2 class="font-inter text-sm font-semibold text-black">
+              Job Listings
+            </h2>
+            <div class="flex gap-4 p-1 bg-gray-200 rounded-lg self-start sm:self-auto">
+            <span
+              class="font-inter text-sm px-3 py-1 cursor-pointer rounded-md transition-colors duration-200"
+              [class.text-white]="activeView === 'weekly'"
+              [class.bg-[#6750A4]]="activeView === 'weekly'"
+              [class.text-gray-700]="activeView !== 'weekly'"
+              (click)="setActiveView('weekly')"
+            >Weekly</span>
+              <span
+                class="font-inter text-sm px-3 py-1 cursor-pointer rounded-md transition-colors duration-200"
+                [class.text-white]="activeView === 'monthly'"
+                [class.bg-[#6750A4]]="activeView === 'monthly'"
+                [class.text-gray-700]="activeView !== 'monthly'"
+                (click)="setActiveView('monthly')"
+              >Monthly</span>
+            </div>
+          </div>
+
+          <!-- Loading and Error States -->
+          <div *ngIf="loading" class="flex justify-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6750A4]"></div>
+          </div>
+
+          <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg mb-4">
+            {{ error }}
+            <button
+              (click)="loadData()"
+              class="ml-2 underline text-[#6750A4] font-medium"
+            >
+              Try Again
+            </button>
+          </div>
+
+          <!-- Job Listings Content -->
+          <div *ngIf="!loading && !error" class="flex flex-col gap-4">
+            <!-- Days Header -->
+            <div class="hidden md:flex justify-between overflow-x-auto">
+              <div *ngFor="let day of days" class="min-w-[100px] md:w-[162px] p-2 text-center font-inter text-base text-[#767676] border-b border-black/10">
+                {{ day }}
+              </div>
+            </div>
+
+            <!-- Mobile Day Selector -->
+            <div class="md:hidden mb-4">
+              <select class="w-full p-2 border border-black/10 rounded-lg font-inter text-base" [(ngModel)]="selectedDay" name="daySelector">
+                <option *ngFor="let day of days" [value]="day">{{day}}</option>
+              </select>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="jobListings.length === 0" class="flex flex-col items-center justify-center py-8 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h3 class="font-medium text-gray-900 mb-1">No job listings found</h3>
+              <p class="text-gray-500 mb-4">There are no job listings available for this week.</p>
+              <button
+                (click)="loadData()"
+                class="px-4 py-2 bg-[#6750A4] text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                Refresh
+              </button>
+            </div>
+
+            <!-- Job Cards Grid -->
+            <div *ngIf="jobListings.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <!-- Mobile: Jobs for Selected Day -->
+              <ng-container *ngIf="isMobileView()">
+                <ng-container *ngFor="let job of getJobsForDay(selectedDay)">
+                  <div class="p-4 border border-black/10 rounded-lg hover:shadow-md transition-shadow">
+                    <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">{{job.location}}</h3>
+                    <p class="font-inter text-sm text-[#1E1E1E] mb-2">{{job.description}}</p>
+                    <p *ngIf="job.status" class="font-inter text-xs text-gray-500 mb-2">Status: {{job.status}}</p>
+                    <button
+                      class="text-white border-none rounded-lg py-2 px-4 font-inter text-sm bg-[#6750A4] hover:bg-purple-700 transition-colors"
+                      (click)="showJobDetails(job)">
+                      Details
+                    </button>
+                  </div>
+                </ng-container>
+
+                <!-- If no jobs for the selected day -->
+                <div *ngIf="getJobsForDay(selectedDay).length === 0" class="col-span-full p-4 text-center text-gray-500">
+                  No jobs scheduled for {{selectedDay}}
+                </div>
+              </ng-container>
+
+              <!-- Desktop: Jobs by Day (Columns) -->
+              <ng-container *ngIf="!isMobileView()">
+                <div *ngFor="let day of days" class="flex flex-col gap-4">
+                  <!-- Day column header - helps with mobile -->
+                  <div class="md:hidden font-medium text-center border-b border-black/10 pb-2 mb-2">
+                    {{ day }}
+                  </div>
+
+                  <!-- Jobs for this day -->
+                  <ng-container *ngFor="let job of getJobsForDay(day)">
+                    <div class="p-4 border border-black/10 rounded-lg hover:shadow-md transition-shadow">
+                      <h3 class="font-inter text-base font-bold text-[#1E1E1E] mb-1">
+                        {{ job.location }}
+                      </h3>
+                      <p class="font-inter text-sm text-[#1E1E1E] mb-2">
+                        {{ job.description }}
+                      </p>
+                      <p *ngIf="job.status" class="font-inter text-xs text-gray-500 mb-2">Status: {{job.status}}</p>
+                      <button
+                        class="text-white border-none rounded-lg py-2 px-4 font-inter text-sm bg-[#6750A4] hover:bg-purple-700 transition-colors w-full"
+                        (click)="showJobDetails(job)"
+                      >
+                        Details
+                      </button>
+                    </div>
+                  </ng-container>
+
+                  <!-- Empty state for each day -->
+                  <div *ngIf="getJobsForDay(day).length === 0" class="p-4 border border-dashed border-gray-300 rounded-lg text-center text-gray-500 h-24 flex items-center justify-center bg-gray-50">
+                    <span>No jobs</span>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
           </div>
         </div>
       </div>

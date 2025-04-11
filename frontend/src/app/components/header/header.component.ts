@@ -13,22 +13,11 @@ import { LoginComponent } from "../login/login.component";
     >
       <div class="flex gap-6 items-center self-stretch my-auto w-[169px]">
         <img
-          src="../../../assets/images/logo.png"
+          src="../../../assets/images/logo1.png"
           class="object-contain self-stretch my-auto rounded-md aspect-[1.34] w-[100px]"
           alt="Logo"
         />
       </div>
-      <nav
-        *ngIf="!(isDashboard$ | async)"
-        class="flex flex-wrap flex-1 shrink gap-2 items-start self-stretch my-auto text-base leading-none whitespace-nowrap basis-0 min-w-60 text-stone-900 max-md:max-w-full"
-      >
-        <button class="gap-2 self-stretch p-2 rounded-lg bg-neutral-100">
-          Products
-        </button>
-        <button class="gap-2 self-stretch p-2 rounded-lg">Solutions</button>
-        <button class="gap-2 self-stretch p-2 rounded-lg">Pricing</button>
-        <button class="gap-2 self-stretch p-2 rounded-lg">Contact</button>
-      </nav>
       <nav
         *ngIf="isDashboard$ | async"
         class="flex flex-wrap flex-1 shrink gap-2 items-start self-stretch my-auto text-base leading-none whitespace-nowrap basis-0 min-w-60 text-stone-900 max-md:max-w-full"
