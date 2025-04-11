@@ -23,22 +23,22 @@ interface CalendarWeek {
   imports: [CommonModule, FormsModule, MatDialogModule],
   template: `
     <div class="calendar-container bg-white rounded-lg shadow h-full">
-      <!-- Calendar Header -->
-      <div class="calendar-header flex justify-between items-center p-4 border-b">
+      <!-- Calendar Header - Fixed at top -->
+      <div class="calendar-header flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 sm:p-4 border-b gap-2 sm:gap-0">
         <div class="flex items-center gap-2">
           <button (click)="previousPeriod()" class="p-2 rounded hover:bg-gray-100">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
           </button>
-          <h2 class="text-lg font-semibold">{{ getHeaderText() }}</h2>
+          <h2 class="text-sm sm:text-lg font-semibold truncate max-w-[180px] sm:max-w-none">{{ getHeaderText() }}</h2>
           <button (click)="nextPeriod()" class="p-2 rounded hover:bg-gray-100">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 18l6-6-6-6"/>
             </svg>
           </button>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 self-end sm:self-auto">
           <button (click)="setToday()" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded">Today</button>
           <button
             (click)="setView('weekly')"
@@ -58,38 +58,40 @@ interface CalendarWeek {
       </div>
 
       <!-- Weekly View -->
-      <div *ngIf="currentView === 'weekly'" class="weekly-view h-[calc(100%-60px)]">
-        <!-- Days of Week Header -->
-        <div class="grid grid-cols-7 border-b">
-          <div *ngFor="let day of daysOfWeek" class="p-2 text-center text-sm font-medium border-r last:border-r-0">
-            {{ day }}
-          </div>
-        </div>
-
-        <!-- Weekly Calendar Grid -->
-        <div class="grid grid-cols-7 h-full">
-          <div *ngFor="let day of weekDays"
-               class="border-r last:border-r-0 border-b p-2 relative h-full overflow-auto cursor-pointer hover:bg-gray-50"
-               [class.bg-blue-50]="day.isToday"
-               (click)="showDayModal(day)">
-            <div class="flex justify-between items-center mb-2 sticky top-0 bg-inherit pt-1 pb-2">
-              <span class="text-sm font-semibold" [class.text-blue-600]="day.isToday">
-                {{ day.date.getDate() }}
-              </span>
-              <span class="text-xs text-gray-500">
-                {{ day.date | date:'EEE' }}
-              </span>
+      <div *ngIf="currentView === 'weekly'" class="calendar-scroll-container">
+        <div class="weekly-view-container">
+          <!-- Days of Week Header - Fixed when scrolling horizontally -->
+          <div class="days-of-week-header">
+            <div *ngFor="let day of daysOfWeek" class="day-header">
+              {{ getShortDay(day) }}
             </div>
+          </div>
 
-            <!-- Events for day -->
-            <div *ngIf="day.events.length > 0" class="space-y-1">
-              <div *ngFor="let event of day.events.slice(0, 3)"
-                   class="p-1 text-xs bg-indigo-100 rounded truncate cursor-pointer"
-                   (click)="selectEvent(event, $event)">
-                {{ event.description }}
+          <!-- Weekly Calendar Grid - Scrollable area -->
+          <div class="days-container">
+            <div *ngFor="let day of weekDays"
+                 class="day-column"
+                 [class.today-cell]="day.isToday"
+                 (click)="showDayModal(day)">
+              <div class="day-header-cell">
+                <span class="day-number" [class.today-number]="day.isToday">
+                  {{ day.date.getDate() }}
+                </span>
+                <span class="day-name">
+                  {{ day.date | date:'EEE' }}
+                </span>
               </div>
-              <div *ngIf="day.events.length > 3" class="text-xs text-gray-500 text-center">
-                +{{ day.events.length - 3 }} more
+
+              <!-- Events for day -->
+              <div *ngIf="day.events.length > 0" class="events-container">
+                <div *ngFor="let event of day.events.slice(0, 3)"
+                     class="event-item"
+                     (click)="selectEvent(event, $event)">
+                  {{ event.description }}
+                </div>
+                <div *ngIf="day.events.length > 3" class="more-events">
+                  +{{ day.events.length - 3 }} more
+                </div>
               </div>
             </div>
           </div>
@@ -97,34 +99,36 @@ interface CalendarWeek {
       </div>
 
       <!-- Monthly View -->
-      <div *ngIf="currentView === 'monthly'" class="monthly-view h-[calc(100%-60px)]">
-        <!-- Days of Week Header -->
-        <div class="grid grid-cols-7 border-b">
-          <div *ngFor="let day of daysOfWeek" class="p-2 text-center text-sm font-medium border-r last:border-r-0">
-            {{ day }}
-          </div>
-        </div>
-
-        <!-- Monthly Calendar Grid -->
-        <div class="grid grid-cols-7 h-full" style="grid-template-rows: repeat(6, 1fr);">
-          <div *ngFor="let day of monthDays"
-               class="border-r last:border-r-0 border-b p-1 relative overflow-hidden cursor-pointer hover:bg-gray-50"
-               [class.opacity-40]="!day.isCurrentMonth"
-               [class.bg-blue-50]="day.isToday"
-               (click)="showDayModal(day)">
-            <div class="text-sm font-semibold mb-1" [class.text-blue-600]="day.isToday">
-              {{ day.date.getDate() }}
+      <div *ngIf="currentView === 'monthly'" class="calendar-scroll-container">
+        <div class="monthly-view-container">
+          <!-- Days of Week Header -->
+          <div class="days-of-week-header">
+            <div *ngFor="let day of daysOfWeek" class="day-header">
+              {{ getShortDay(day) }}
             </div>
+          </div>
 
-            <!-- Dots and mini-events for month view -->
-            <div *ngIf="day.events.length > 0" class="flex flex-col gap-1">
-              <div *ngFor="let event of day.events.slice(0, 2)"
-                   class="text-xs p-1 bg-indigo-100 rounded truncate"
-                   (click)="selectEvent(event, $event)">
-                {{ event.description }}
+          <!-- Monthly Calendar Grid -->
+          <div class="month-grid">
+            <div *ngFor="let day of monthDays"
+                 class="month-day-cell"
+                 [class.opacity-40]="!day.isCurrentMonth"
+                 [class.today-cell]="day.isToday"
+                 (click)="showDayModal(day)">
+              <div class="day-number-month" [class.today-number]="day.isToday">
+                {{ day.date.getDate() }}
               </div>
-              <div *ngIf="day.events.length > 2" class="text-xs text-center text-gray-500">
-                +{{ day.events.length - 2 }} more
+
+              <!-- Events for month view -->
+              <div *ngIf="day.events.length > 0" class="month-events-container">
+                <div *ngFor="let event of day.events.slice(0, 2)"
+                     class="month-event-item"
+                     (click)="selectEvent(event, $event)">
+                  {{ event.description }}
+                </div>
+                <div *ngIf="day.events.length > 2" class="more-events">
+                  +{{ day.events.length - 2 }} more
+                </div>
               </div>
             </div>
           </div>
@@ -138,9 +142,183 @@ interface CalendarWeek {
       height: 100%;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
-    /* Make scrollbar less obtrusive */
+    .calendar-scroll-container {
+      flex: 1;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+      height: calc(100% - 60px);
+    }
+
+    /* Weekly View Styling */
+    .weekly-view-container {
+      min-width: 700px; /* Ensure enough width for all days */
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .days-of-week-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      border-bottom: 1px solid #e5e7eb;
+      background-color: white;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .day-header {
+      padding: 8px;
+      text-align: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-right: 1px solid #e5e7eb;
+    }
+
+    .day-header:last-child {
+      border-right: none;
+    }
+
+    .days-container {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      flex: 1;
+      min-height: 300px;
+    }
+
+    .day-column {
+      border-right: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 8px;
+      position: relative;
+      min-height: 200px;
+      overflow-y: auto;
+      cursor: pointer;
+    }
+
+    .day-column:last-child {
+      border-right: none;
+    }
+
+    .day-column:hover {
+      background-color: #f9fafb;
+    }
+
+    .today-cell {
+      background-color: #ebf5ff;
+    }
+
+    .day-header-cell {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      position: sticky;
+      top: 0;
+      background-color: inherit;
+      padding-top: 4px;
+      padding-bottom: 8px;
+      z-index: 5;
+    }
+
+    .day-number {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .day-name {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .today-number {
+      color: #3b82f6;
+    }
+
+    .events-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .event-item {
+      padding: 4px;
+      font-size: 0.75rem;
+      background-color: #e0e7ff;
+      border-radius: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    .more-events {
+      font-size: 0.75rem;
+      color: #6b7280;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    /* Monthly View Styling */
+    .monthly-view-container {
+      min-width: 350px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-auto-rows: minmax(60px, 1fr);
+      flex: 1;
+    }
+
+    .month-day-cell {
+      border-right: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 4px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      min-height: 70px;
+    }
+
+    .month-day-cell:last-child {
+      border-right: none;
+    }
+
+    .month-day-cell:hover {
+      background-color: #f9fafb;
+    }
+
+    .day-number-month {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .month-events-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .month-event-item {
+      padding: 2px 4px;
+      font-size: 0.75rem;
+      background-color: #e0e7ff;
+      border-radius: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    /* Improve scrollbars appearance */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -157,6 +335,29 @@ interface CalendarWeek {
 
     ::-webkit-scrollbar-thumb:hover {
       background: #9ca3af;
+    }
+
+    /* For Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #d1d5db transparent;
+    }
+
+    /* Touch interaction improvement for mobile */
+    @media (max-width: 640px) {
+      .day-column, .month-day-cell {
+        padding: 4px;
+      }
+
+      .event-item, .month-event-item {
+        padding: 6px 4px; /* Larger touch target */
+      }
+
+      /* Explicitly define tap highlight on mobile */
+      .day-column:active, .month-day-cell:active,
+      .event-item:active, .month-event-item:active {
+        background-color: rgba(229, 231, 235, 0.5);
+      }
     }
   `]
 })
@@ -300,31 +501,29 @@ export class JobCalendarComponent implements OnInit, OnChanges {
     this.selectedDay = null;
   }
 
+  // Helper function to get shorter day names on mobile
+  getShortDay(day: string): string {
+    // Check if this is a mobile viewport
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 640 ? day.charAt(0) : day;
+    }
+    return day;
+  }
+
   /**
    * Shows a modal with all events for a specific day
    */
   showDayModal(day: CalendarDay): void {
-    if (day.events.length === 0) {
-      // Maybe show an empty day modal or a message
-      console.log('No events for this day');
-
-      // Open empty day modal
-      this.dialog.open(DayModalComponent, {
-        width: '500px',
-        data: {
-          title: day.date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-          date: day.date.toISOString().split('T')[0],
-          events: [],
-          isToday: day.isToday
-        }
-      });
-
-      return;
+    // Determine dialog width based on screen size
+    let dialogWidth = '500px';
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      dialogWidth = '95vw';
     }
 
     // Open the modal with day information
     const dialogRef = this.dialog.open(DayModalComponent, {
-      width: '500px',
+      width: dialogWidth,
+      maxWidth: '95vw',
       data: {
         title: day.date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
         date: day.date.toISOString().split('T')[0],
@@ -353,9 +552,16 @@ export class JobCalendarComponent implements OnInit, OnChanges {
   selectEvent(event: any, e: MouseEvent): void {
     e.stopPropagation(); // Prevent the day click event from firing
 
+    // Determine dialog width based on screen size
+    let dialogWidth = '500px';
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      dialogWidth = '95vw';
+    }
+
     // Open the modal with event details
     const dialogRef = this.dialog.open(JobModalComponent, {
-      width: '500px',
+      width: dialogWidth,
+      maxWidth: '95vw',
       data: {
         title: event.location,
         location: event.location,
@@ -383,13 +589,27 @@ export class JobCalendarComponent implements OnInit, OnChanges {
       const startMonth = startOfWeek.toLocaleString('default', { month: 'short' });
       const endMonth = endOfWeek.toLocaleString('default', { month: 'short' });
 
-      if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
-        return `${startMonth} ${startOfWeek.getDate()} - ${endOfWeek.getDate()}, ${startOfWeek.getFullYear()}`;
+      // Use shorter date format - especially on mobile
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+
+      if (isMobile) {
+        if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
+          return `${startMonth} ${startOfWeek.getDate()}-${endOfWeek.getDate()}`;
+        } else {
+          return `${startMonth} ${startOfWeek.getDate()}-${endMonth} ${endOfWeek.getDate()}`;
+        }
       } else {
-        return `${startMonth} ${startOfWeek.getDate()} - ${endMonth} ${endOfWeek.getDate()}, ${startOfWeek.getFullYear()}`;
+        if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
+          return `${startMonth} ${startOfWeek.getDate()} - ${endOfWeek.getDate()}, ${startOfWeek.getFullYear()}`;
+        } else {
+          return `${startMonth} ${startOfWeek.getDate()} - ${endMonth} ${endOfWeek.getDate()}, ${startOfWeek.getFullYear()}`;
+        }
       }
     } else {
-      return this.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+      // For month view, shorter format on mobile
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+      const monthFormat: Intl.DateTimeFormatOptions = isMobile ? { month: 'short', year: 'numeric' } : { month: 'long', year: 'numeric' };
+      return this.currentDate.toLocaleString('default', monthFormat);
     }
   }
 }

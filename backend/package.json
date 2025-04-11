@@ -1,20 +1,26 @@
 {
-  "name": "backend",
+  "name": "marqd-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
     "pretest": "npm run build",
-    "dev": "tsnd --respawn -r tsconfig-paths/register --pretty --transpile-only ./src/index.ts",
     "build": "tsc && tsc-alias",
-    "start": "node -r tsconfig-paths/register dist/index.js",
     "postinstall": "prisma generate",
-    "test": "jest --config ./jest.config.json && npm run parse-r && npm run parse-fd",
+    "test": "jest --config ./jest.config.json",
     "seed": "ts-node prisma/seed.ts"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "event-management",
+    "marquee",
+    "nodejs",
+    "express",
+    "postgres"
+  ],
+  "author": "Kevin",
   "license": "ISC",
-  "description": "",
+  "description": "Backend for Marq'D event management system",
   "dependencies": {
     "@prisma/client": "^6.5.0",
     "@types/bcrypt": "^5.0.2",
@@ -27,8 +33,10 @@
     "express": "^4.21.2",
     "firebase": "^11.6.0",
     "firebase-admin": "^13.2.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.12.1",
     "multer": "^1.4.5-lts.2",
+    "nodemon": "^3.1.0",
     "pdf2json": "^3.1.4",
     "pg": "^8.14.1",
     "pg-hstore": "^2.3.4",
@@ -37,6 +45,10 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.14.0",
+    "jest": "^29.7.0",
     "@types/cookie-parser": "^1.4.8",
     "@types/node": "^22.14.0",
     "ts-node-dev": "^2.0.0",

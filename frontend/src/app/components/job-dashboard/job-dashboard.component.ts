@@ -1,363 +1,233 @@
-// src/app/components/job-dashboard/job-dashboard.component.ts
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { NavigationService } from "../../../services/navigation.service";
+import { ApiService } from "../../../services/api.service";
 import { MatDialog } from "@angular/material/dialog";
 import { JobModalComponent } from "./job-modal/job-model.component";
-import { JobCalendarComponent } from "./job-calendar/job-calendar.component";
+import { Subject, takeUntil } from "rxjs";
+import {JobCalendarComponent} from "./job-calendar/job-calendar.component";
 
 interface JobListing {
-  id: string;
+  id?: string;
   location: string;
   description: string;
-  date: Date;
+  day: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday";
+  date?: Date;
+  status?: string;
+}
+
+interface JobModal {
+  title: string;
+  location: string;
+  description: string;
+  date: string;
   status: string;
-}
-
-interface InventoryItem {
-  id: string;
-  name: string;
-  category: 'consumable' | 'equipment';
-  quantity: number;
-  threshold: number; // Low stock threshold
-  unit: string; // e.g., "pcs", "boxes", "rolls"
-  status?: 'available' | 'low' | 'out'; // Computed status
-}
-
-// Maintenance item interface
-interface MaintenanceItem {
-  id: string;
-  equipmentName: string;
-  lastMaintenance: Date;
-  nextMaintenance: Date;
-  status: 'upcoming' | 'due' | 'overdue' | 'in-progress';
-  notes?: string;
-}
-
-// Equipment usage interface
-interface EquipmentUsage {
-  id: string;
-  name: string;
-  totalUnits: number;
-  inUse: number;
-  available: number;
-  category: string; // e.g., "marquee", "lighting", "flooring"
+  assignedTo: string[];
+  equipment: string[];
 }
 
 interface Marquee {
+  id?: string;
   size: string;
   checked: boolean;
-  assigned: boolean;
+  assigned?: boolean;
 }
 
 interface Vehicle {
+  id?: string;
   initial: string;
   name: string;
-  available: boolean; // true = available, false = taken for a job
+  available?: boolean;
 }
 
 @Component({
   selector: "app-job-dashboard",
-  templateUrl: './job-dashboard.component.html',
+  templateUrl: "./job-dashboard.component.html",
   styleUrls: ["./job-dashboard.component.css"],
   standalone: true,
   imports: [CommonModule, FormsModule, JobCalendarComponent],
 })
 export class JobDashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
   searchQuery: string = "";
   activeView: "weekly" | "monthly" = "weekly";
   vehicleView: "today" | "weekly" = "today";
   selectedDay: string = "Monday";
   screenWidth: number = window.innerWidth;
+  loading: boolean = false;
+  error: string = "";
+  mobileMenuOpen: boolean = false;
 
-  // Sample job listings with dates
-  marquees: Marquee[] = [
-    { size: "40x50", checked: true, assigned: false },
-    { size: "50x120", checked: true, assigned: false },
-    { size: "20x20", checked: true, assigned: false },
-    { size: "20x20", checked: true, assigned: false },
-    { size: "40x60", checked: true, assigned: false },
-    { size: "30x80", checked: true, assigned: false },
-  ];
+  days: string[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-  inventoryItems: InventoryItem[] = [
-    {
-      id: 'inv1',
-      name: '5m Flooring',
-      category: 'consumable',
-      quantity: 120,
-      threshold: 200,
-      unit: 'pcs',
-      status: 'low'
-    },
-    {
-      id: 'inv2',
-      name: '3m Marquee Walls',
-      category: 'consumable',
-      quantity: 350,
-      threshold: 100,
-      unit: 'pcs',
-      status: 'available'
-    },
-    {
-      id: 'inv3',
-      name: '3m Lining Swags',
-      category: 'consumable',
-      quantity: 15,
-      threshold: 20,
-      unit: 'rolls',
-      status: 'low'
-    },
-    {
-      id: 'inv4',
-      name: 'Chandelier Lights',
-      category: 'consumable',
-      quantity: 0,
-      threshold: 10,
-      unit: 'pcs',
-      status: 'out'
-    }
-  ];
+  jobListings: JobListing[] = [];
+  marquees: Marquee[] = [];
+  vehicles: Vehicle[] = [];
 
-// Sample maintenance data
-  maintenanceItems: MaintenanceItem[] = [
-    {
-      id: 'maint1',
-      equipmentName: 'Generator A',
-      lastMaintenance: new Date(2024, 11, 15),
-      nextMaintenance: new Date(2025, 4, 15),
-      status: 'due',
-      notes: 'Oil change and filter replacement needed'
-    },
-    {
-      id: 'maint2',
-      equipmentName: 'Pressure Washer',
-      lastMaintenance: new Date(2024, 10, 20),
-      nextMaintenance: new Date(2025, 3, 20),
-      status: 'overdue',
-      notes: 'Replace nozzle and check pump'
-    },
-    {
-      id: 'maint3',
-      equipmentName: 'Marquee Fabric Cleaner',
-      lastMaintenance: new Date(2025, 1, 5),
-      nextMaintenance: new Date(2025, 5, 5),
-      status: 'upcoming'
-    }
-  ];
-
-// Sample equipment usage data
-  equipmentUsage: EquipmentUsage[] = [
-    {
-      id: 'eq1',
-      name: 'Marquee Frames 20x40',
-      totalUnits: 8,
-      inUse: 5,
-      available: 3,
-      category: 'marquee'
-    },
-    {
-      id: 'eq2',
-      name: 'LED String Lights',
-      totalUnits: 25,
-      inUse: 18,
-      available: 7,
-      category: 'lighting'
-    },
-    {
-      id: 'eq3',
-      name: 'Wheelchair Friendly Portaloos',
-      totalUnits: 12,
-      inUse: 8,
-      available: 4,
-      category: 'flooring'
-    },
-    {
-      id: 'eq4',
-      name: 'Heaters',
-      totalUnits: 6,
-      inUse: 6,
-      available: 0,
-      category: 'equipment'
-    }
-  ];
-
-  vehicles: Vehicle[] = [
-    { initial: "A", name: "TOYOTA LANDCRUISER 12-L-4567", available: true },
-    { initial: "A", name: "TOYOTA LANDCRUISER 08-C-854", available: false },
-    { initial: "A", name: "TOYOTA LANDCRUISER 10-L-92", available: true },
-    { initial: "A", name: "TOYOTA HILUX 171-L-685", available: false },
-  ];
-
-  jobListings: JobListing[] = [
-    {
-      id: "1",
-      location: "Co. Cork",
-      description: "20x50 Marquee Setup",
-      date: new Date(2025, 3, 8), // April 8, 2025
-      status: "Pending"
-    },
-    {
-      id: "2",
-      location: "Co. Cork",
-      description: "40x80 Marquee Setup",
-      date: new Date(2025, 3, 8), // April 8, 2025
-      status: "Confirmed"
-    },
-    {
-      id: "3",
-      location: "Co. Limerick",
-      description: "6 Portaloos Installation",
-      date: new Date(2025, 3, 9), // April 9, 2025
-      status: "Pending"
-    },
-    {
-      id: "4",
-      location: "Co. Limerick",
-      description: "30x60 Marquee Setup",
-      date: new Date(2025, 3, 10), // April 10, 2025
-      status: "Confirmed"
-    },
-    {
-      id: "5",
-      location: "Co. Clare",
-      description: "3m Pagoda Installation",
-      date: new Date(2025, 3, 11), // April 11, 2025
-      status: "Confirmed"
-    },
-    {
-      id: "6",
-      location: "Co. Cork",
-      description: "20x50 Marquee Dismantling",
-      date: new Date(2025, 3, 11), // April 11, 2025
-      status: "Pending"
-    },
-    {
-      id: "7",
-      location: "Co. Cork",
-      description: "40x80 Marquee Dismantling",
-      date: new Date(2025, 3, 12), // April 12, 2025
-      status: "Pending"
-    },
-    {
-      id: "8",
-      location: "Co. Limerick",
-      description: "30x60 Marquee Dismantling",
-      date: new Date(2025, 3, 12), // April 12, 2025
-      status: "Pending"
-    },
-    {
-      id: "9",
-      location: "Co. Clare",
-      description: "3m Pagoda Dismantling",
-      date: new Date(2025, 3, 12), // April 12, 2025
-      status: "Pending"
-    }
-  ];
-
-  constructor(
-    private navigationService: NavigationService,
-    private dialog: MatDialog
-  ) {}
-
-  ngOnInit(): void {
-    this.navigationService.setDashboardPage(true);
-    console.log('Job dashboard initialized');
-
-    // Initialize with today's date
-    const today = new Date();
-    console.log('Today:', today.toLocaleDateString());
-  }
-
-  ngOnDestroy(): void {
-    this.navigationService.setDashboardPage(false);
-    console.log('Job dashboard destroyed');
-
-    // Clean up any subscriptions or resources here
-  }
 
   @HostListener("window:resize", ["$event"])
   onResize(event: any) {
     this.screenWidth = window.innerWidth;
   }
 
+  constructor(
+    private navigationService: NavigationService,
+    private apiService: ApiService,
+    private dialog: MatDialog
+  ) {}
+
+  ngOnInit(): void {
+    this.navigationService.setDashboardPage(true);
+    this.loadData();
+  }
+
+  ngOnDestroy(): void {
+    this.navigationService.setDashboardPage(false);
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadData(): void {
+    this.loading = true;
+
+    // Load events (job listings)
+    this.apiService.getEvents()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (events) => {
+          // Convert events to job listings format
+          this.jobListings = events.map((event: any) => {
+            const date = new Date(event.date);
+            const dayOfWeek = date.getDay();
+            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+            return {
+              id: event.id,
+              location: event.location || 'Unknown Location',
+              description: event.description || 'No description',
+              day: days[dayOfWeek] as any,
+              date: date,
+              status: event.status || 'Pending'
+            };
+          });
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error loading events:', err);
+          this.error = 'Failed to load job listings. Please try again later.';
+          this.loading = false;
+
+          // Fallback to mock data for development
+          this.loadMockData();
+        }
+      });
+
+    // Load items (for marquees)
+    this.apiService.getItems()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (items) => {
+          this.marquees = items
+            .filter((item: any) => item.type === 'marquee')
+            .map((item: any) => ({
+              id: item.id,
+              size: item.name,
+              checked: true,
+              assigned: item.assigned || false
+            }));
+        },
+        error: (err) => {
+          console.error('Error loading items:', err);
+          // Fallback to mock marquee data
+          this.marquees = [
+            { size: "40x50", checked: true, assigned: false },
+            { size: "50x120", checked: true, assigned: true },
+            { size: "20x20", checked: true, assigned: false },
+            { size: "20x20", checked: true, assigned: true },
+            { size: "40x60", checked: true, assigned: false },
+            { size: "30x80", checked: true, assigned: true },
+          ];
+        }
+      });
+
+    // Load vehicles
+    // In a real app, you might have a dedicated vehicles endpoint
+    // For now, we're using mock data
+    this.vehicles = [
+      { initial: "A", name: "TOYOTA LANDCRUISER 12-L-4567", available: true },
+      { initial: "A", name: "TOYOTA LANDCRUISER 08-C-854", available: false },
+      { initial: "A", name: "TOYOTA LANDCRUISER 10-L-92", available: true },
+      { initial: "A", name: "TOYOTA HILUX 171-L-685", available: true },
+    ];
+  }
+
+  // Fallback to mock data for development
+  loadMockData(): void {
+    this.jobListings = [
+      { location: "Co. Cork", description: "20x50, 30x...", day: "Monday" },
+      { location: "Co. Cork", description: "40x80", day: "Monday" },
+      { location: "Co. Limerick", description: "6 Portaloos", day: "Tuesday" },
+      { location: "Co. Limerick", description: "30x60", day: "Wednesday" },
+      { location: "Co. Clare", description: "3m Pagoda", day: "Thursday" },
+      { location: "Co. Cork", description: "20x50, 30x...", day: "Thursday" },
+      { location: "Co. Cork", description: "40x80", day: "Friday" },
+      { location: "Co. Limerick", description: "30x60", day: "Friday" },
+      { location: "Co. Clare", description: "3m Pagoda", day: "Friday" },
+    ];
+  }
+
   setActiveView(view: "weekly" | "monthly"): void {
-    console.log('Setting active view to:', view);
     this.activeView = view;
   }
 
   setVehicleView(view: "today" | "weekly"): void {
-    console.log('Setting vehicle view to:', view);
     this.vehicleView = view;
   }
 
-  isMobileView(): boolean {
-    return this.screenWidth < 768;
+  getJobsForDay(day: string): JobListing[] {
+    return this.jobListings.filter((job) => job.day === day);
   }
+
 
   toggleMarqueeAssignment(index: number): void {
-    this.marquees[index].assigned = !this.marquees[index].assigned;
+    if (this.marquees[index]) {
+      this.marquees[index].assigned = !this.marquees[index].assigned;
 
-    // Log the change for debugging or tracking
-    console.log(`Marquee ${this.marquees[index].size} is now ${this.marquees[index].assigned ? 'assigned' : 'unassigned'}`);
-
-    // In a real application, you might want to call a service to update the server
-    // this.marqueeService.updateAssignment(this.marquees[index]);
-  }
-
-  handleEventSelected(event: any): void {
-    this.showJobDetails(event);
-  }
-
-  activeInventoryTab: 'consumables' | 'maintenance' | 'equipment' = 'consumables';
-
-  /**
-   * Set the active inventory tab
-   */
-  setActiveInventoryTab(tab: 'consumables' | 'maintenance' | 'equipment'): void {
-    this.activeInventoryTab = tab;
-    console.log(`Active inventory tab set to: ${tab}`);
-  }
-
-  /**
-   * Calculate inventory status based on quantity and threshold
-   */
-  calculateInventoryStatus(item: InventoryItem): 'available' | 'low' | 'out' {
-    if (item.quantity <= 0) {
-      return 'out';
-    } else if (item.quantity < item.threshold) {
-      return 'low';
+      // In a real app, you would call the API to update the item
+      /*
+      if (this.marquees[index].id) {
+        this.apiService.updateItem(this.marquees[index].id!, {
+          assigned: this.marquees[index].assigned
+        }).subscribe({
+          next: (updatedItem) => {
+            console.log('Marquee assignment updated:', updatedItem);
+          },
+          error: (err) => {
+            console.error('Error updating marquee assignment:', err);
+            // Revert the UI change on error
+            this.marquees[index].assigned = !this.marquees[index].assigned;
+          }
+        });
+      }
+      */
     }
-    return 'available';
-  }
-
-  /**
-   * Update the inventory data
-   */
-  refreshInventoryData(): void {
-    // Update status for all inventory items
-    this.inventoryItems.forEach(item => {
-      item.status = this.calculateInventoryStatus(item);
-    });
-
-    // In a real application, this would fetch data from a service
-    console.log('Inventory data refreshed');
   }
 
   showJobDetails(job: JobListing): void {
-    console.log('Showing details for job:', job);
+    const modalData: JobModal = {
+      title: `Job at ${job.location}`,
+      location: job.location,
+      description: job.description,
+      date: job.day,
+      status: job.status || "Pending",
+      assignedTo: ["John Doe", "Jane Smith"],
+      equipment: ["20x50 Marquee", "30x60 Marquee", "6 Portaloos"]
+    };
 
     const dialogRef = this.dialog.open(JobModalComponent, {
-      data: {
-        title: `Job at ${job.location}`,
-        location: job.location,
-        description: job.description,
-        date: job.date.toLocaleDateString(),
-        status: job.status,
-        assignedTo: ["John Doe", "Jane Smith"],
-        equipment: ["20x50 Marquee", "30x60 Marquee", "6 Portaloos"]
-      },
+      data: modalData,
       width: '90%',
       maxWidth: '600px'
     });
@@ -370,33 +240,31 @@ export class JobDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleVehicleAvailability(index: number): void {
-    this.vehicles[index].available = !this.vehicles[index].available;
+  handleEventSelected(event: any): void {
+    console.log('Selected event:', event);
 
-    // Log the change for debugging or tracking
-    console.log(`Vehicle ${this.vehicles[index].name} is now ${this.vehicles[index].available ? 'available' : 'unavailable'}`);
+    // Convert event to job format and show details
+    const job: JobListing = {
+      id: event.id,
+      location: event.location || event.name,
+      description: event.description || '',
+      day: new Date(event.date).toLocaleDateString('en-US', { weekday: 'long' }) as any
+    };
 
-    // In a real application, you might want to call a service to update the server
-    // this.vehicleService.updateAvailability(this.vehicles[index]);
+    this.showJobDetails(job);
   }
 
-  /**
-   * Open job details modal
-   */
-  editJob(job: JobListing): void {
-    // In a real app, you would open an edit form or navigate to an edit page
-    console.log('Editing job:', job);
-    // For now, just show an alert
-    alert(`Editing job: ${job.description} at ${job.location}`);
+  isMobileView(): boolean {
+    return this.screenWidth < 768;
   }
 
-  /**
-   * Check if a date is today
-   */
-  isToday(date: Date): boolean {
-    const today = new Date();
-    return date.getFullYear() === today.getFullYear() &&
-      date.getMonth() === today.getMonth() &&
-      date.getDate() === today.getDate();
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  createNewEvent(): void {
+    // Logic to open a dialog for creating a new event
+    console.log('Creating new event');
+    // In a real app, you would open a dialog or navigate to a create form
   }
 }
