@@ -25,7 +25,7 @@ export class FirebaseAuthGuard {
           }
         } else {
           // User is not logged in, redirect to login
-          this.router.navigate(['/login']);
+          this.router.navigate(['/home']);
           return of(false);
         }
       }),

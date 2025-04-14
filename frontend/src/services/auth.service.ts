@@ -179,4 +179,11 @@ export class AuthService {
       map(user => user?.emailVerified || false)
     );
   }
+// TODO: Implement this method
+  isAuthenticated(): Observable<boolean> {
+    const token = localStorage.getItem('token');
+    return of(token !== null);
+  }
+
+
 }

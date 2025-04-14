@@ -5,9 +5,10 @@ import { AuthService } from '../../../services/auth.service';
 import {Router} from "@angular/router";
 
 @Component({
-    selector: 'app-home',
-    templateUrl: './home.component.html',
-    imports: [CommonModule]
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  standalone: true,
+  imports: [CommonModule]
 })
 export class HomeComponent implements OnInit {
   constructor(
@@ -25,7 +26,14 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  loginAndRedirect() {
-    this.authService.login();
+  async loginAndRedirect() {
+    try {
+      await this.authService.loginWithGoogle();
+      // You can add code here that will run after successful login
+      console.log('Successfully logged in with Google');
+    } catch (error) {
+      // Handle any errors that occurred during login
+      console.error('Error logging in with Google:', error);
+    }
   }
 }
