@@ -1,10 +1,10 @@
-import { Component, OnInit, HostListener, Inject } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import {MatDialogModule, MatDialog, MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import { NavigationService } from "../../../../services/navigation.service";
 
-interface JobModal {
+import { Component, Inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import { MatButtonModule } from "@angular/material/button";
+
+interface JobModalData {
   title: string;
   location: string;
   description: string;
@@ -15,8 +15,9 @@ interface JobModal {
 }
 
 @Component({
-  selector: "app-job-modal",
-  template: `
+    selector: "app-modal",
+    imports: [CommonModule, MatDialogModule, MatButtonModule],
+    template: `
     <div class="p-6 max-w-2xl">
       <h2 class="text-xl font-bold mb-4">{{ data.title }}</h2>
 
@@ -31,7 +32,11 @@ interface JobModal {
         </div>
         <div>
           <label class="text-sm text-gray-600">Status</label>
-          <p class="font-medium">{{ data.status }}</p>
+          <p [ngClass]="{
+            'font-medium text-green-600': data.status === 'Confirmed',
+            'font-medium text-yellow-600': data.status === 'Pending',
+            'font-medium text-red-600': data.status === 'Cancelled'
+          }">{{ data.status }}</p>
         </div>
       </div>
 
@@ -67,13 +72,11 @@ interface JobModal {
         </button>
       </div>
     </div>
-  `,
-  standalone: true,
-  imports: [CommonModule, MatDialogModule],
+  `
 })
 export class JobModalComponent {
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: JobModal,
+    @Inject(MAT_DIALOG_DATA) public data: JobModalData,
     public dialogRef: MatDialogRef<JobModalComponent>
   ) {}
 }

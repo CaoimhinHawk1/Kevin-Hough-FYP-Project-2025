@@ -1,17 +1,14 @@
-// src/services/calendar.service.ts
+/** TODO: Fix this stuff
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-import { Event } from '../model/event-model';
-import { remult } from 'remult';
+import { Event } from '../model/event.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CalendarService {
   private readonly apiUrl = '/api/events';
-  private eventRepo = remult.repo(Event);
 
   // Sample events for demo (remove when backend is ready)
   private sampleEvents: Event[] = [
@@ -161,3 +158,4 @@ export class CalendarService {
     return date.toISOString().split('T')[0];
   }
 }
+*/

@@ -1,14 +1,20 @@
-import { Component, OnInit, HostListener } from "@angular/core";
+import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { NavigationService } from "../../../services/navigation.service";
-import {MatDialog} from "@angular/material/dialog";
+import { ApiService } from "../../../services/api.service";
+import { MatDialog } from "@angular/material/dialog";
 import { JobModalComponent } from "./job-modal/job-model.component";
+import { Subject, takeUntil } from "rxjs";
+import {JobCalendarComponent} from "./job-calendar/job-calendar.component";
 
 interface JobListing {
+  id?: string;
   location: string;
   description: string;
   day: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday";
+  date?: Date;
+  status?: string;
 }
 
 interface JobModal {
@@ -22,59 +28,42 @@ interface JobModal {
 }
 
 interface Marquee {
+  id?: string;
   size: string;
   checked: boolean;
+  assigned?: boolean;
 }
 
 interface Vehicle {
+  id?: string;
   initial: string;
   name: string;
+  available?: boolean;
 }
 
 @Component({
-  selector: "app-job-dashboard",
-  templateUrl: "./job-dashboard.component.html",
-  styleUrls: ["./job-dashboard.component.css"],
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+    selector: "app-job-dashboard",
+    templateUrl: "./job-dashboard.component.html",
+    styleUrls: ["./job-dashboard.component.css"],
+    imports: [CommonModule, FormsModule, JobCalendarComponent]
 })
-export class JobDashboardComponent implements OnInit {
+export class JobDashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
   searchQuery: string = "";
   activeView: "weekly" | "monthly" = "weekly";
   vehicleView: "today" | "weekly" = "today";
   selectedDay: string = "Monday";
   screenWidth: number = window.innerWidth;
+  loading: boolean = false;
+  error: string = "";
+  mobileMenuOpen: boolean = false;
 
   days: string[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-  jobListings: JobListing[] = [
-    { location: "Co. Cork", description: "20x50, 30x...", day: "Monday" },
-    { location: "Co. Cork", description: "40x80", day: "Monday" },
-    { location: "Co. Limerick", description: "6 Portaloos", day: "Tuesday" },
-    { location: "Co. Limerick", description: "30x60", day: "Wednesday" },
-    { location: "Co. Clare", description: "3m Pagoda", day: "Thursday" },
-    { location: "Co. Cork", description: "20x50, 30x...", day: "Thursday" },
-    { location: "Co. Cork", description: "40x80", day: "Friday" },
-    { location: "Co. Limerick", description: "30x60", day: "Friday" },
-    { location: "Co. Clare", description: "3m Pagoda", day: "Friday" },
-  ];
-
-  marquees: Marquee[] = [
-    { size: "40x50", checked: true },
-    { size: "50x120", checked: true },
-    { size: "20x20", checked: true },
-    { size: "20x20", checked: true },
-    { size: "40x60", checked: true },
-    { size: "30x80", checked: true },
-  ];
-
-  vehicles: Vehicle[] = [
-    { initial: "A", name: "TOYOTA LANDCRUISER 12-L-4567" },
-    { initial: "A", name: "TOYOTA LANDCRUISER 08-C-854" },
-    { initial: "A", name: "TOYOTA LANDCRUISER 10-L-92" },
-    { initial: "A", name: "TOYOTA HILUX 171-L-685" },
-  ];
-
+  jobListings: JobListing[] = [];
+  marquees: Marquee[] = [];
+  vehicles: Vehicle[] = [];
 
 
   @HostListener("window:resize", ["$event"])
@@ -83,16 +72,109 @@ export class JobDashboardComponent implements OnInit {
   }
 
   constructor(
-      private navigationService: NavigationService,
-      private dialog: MatDialog
+    private navigationService: NavigationService,
+    private apiService: ApiService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
     this.navigationService.setDashboardPage(true);
+    this.loadData();
   }
 
   ngOnDestroy(): void {
     this.navigationService.setDashboardPage(false);
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadData(): void {
+    this.loading = true;
+
+    // Load events (job listings)
+    this.apiService.getEvents()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (events) => {
+          // Convert events to job listings format
+          this.jobListings = events.map((event: any) => {
+            const date = new Date(event.date);
+            const dayOfWeek = date.getDay();
+            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+            return {
+              id: event.id,
+              location: event.location || 'Unknown Location',
+              description: event.description || 'No description',
+              day: days[dayOfWeek] as any,
+              date: date,
+              status: event.status || 'Pending'
+            };
+          });
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error loading events:', err);
+          this.error = 'Failed to load job listings. Please try again later.';
+          this.loading = false;
+
+          // Fallback to mock data for development
+          this.loadMockData();
+        }
+      });
+
+    // Load items (for marquees)
+    this.apiService.getItems()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (items) => {
+          this.marquees = items
+            .filter((item: any) => item.type === 'marquee')
+            .map((item: any) => ({
+              id: item.id,
+              size: item.name,
+              checked: true,
+              assigned: item.assigned || false
+            }));
+        },
+        error: (err) => {
+          console.error('Error loading items:', err);
+          // Fallback to mock marquee data
+          this.marquees = [
+            { size: "40x50", checked: true, assigned: false },
+            { size: "50x120", checked: true, assigned: true },
+            { size: "20x20", checked: true, assigned: false },
+            { size: "20x20", checked: true, assigned: true },
+            { size: "40x60", checked: true, assigned: false },
+            { size: "30x80", checked: true, assigned: true },
+          ];
+        }
+      });
+
+    // Load vehicles
+    // In a real app, you might have a dedicated vehicles endpoint
+    // For now, we're using mock data
+    this.vehicles = [
+      { initial: "A", name: "TOYOTA LANDCRUISER 12-L-4567", available: true },
+      { initial: "A", name: "TOYOTA LANDCRUISER 08-C-854", available: false },
+      { initial: "A", name: "TOYOTA LANDCRUISER 10-L-92", available: true },
+      { initial: "A", name: "TOYOTA HILUX 171-L-685", available: true },
+    ];
+  }
+
+  // Fallback to mock data for development
+  loadMockData(): void {
+    this.jobListings = [
+      { location: "Co. Cork", description: "20x50, 30x...", day: "Monday" },
+      { location: "Co. Cork", description: "40x80", day: "Monday" },
+      { location: "Co. Limerick", description: "6 Portaloos", day: "Tuesday" },
+      { location: "Co. Limerick", description: "30x60", day: "Wednesday" },
+      { location: "Co. Clare", description: "3m Pagoda", day: "Thursday" },
+      { location: "Co. Cork", description: "20x50, 30x...", day: "Thursday" },
+      { location: "Co. Cork", description: "40x80", day: "Friday" },
+      { location: "Co. Limerick", description: "30x60", day: "Friday" },
+      { location: "Co. Clare", description: "3m Pagoda", day: "Friday" },
+    ];
   }
 
   setActiveView(view: "weekly" | "monthly"): void {
@@ -107,13 +189,29 @@ export class JobDashboardComponent implements OnInit {
     return this.jobListings.filter((job) => job.day === day);
   }
 
-  showJobDetails(job: JobListing): void {
-    console.log("Showing details for job:", job);
-    // Implement navigation or modal display logic here
-  }
 
-  isMobileView(): boolean {
-    return this.screenWidth < 768;
+  toggleMarqueeAssignment(index: number): void {
+    if (this.marquees[index]) {
+      this.marquees[index].assigned = !this.marquees[index].assigned;
+
+      // In a real app, you would call the API to update the item
+      /*
+      if (this.marquees[index].id) {
+        this.apiService.updateItem(this.marquees[index].id!, {
+          assigned: this.marquees[index].assigned
+        }).subscribe({
+          next: (updatedItem) => {
+            console.log('Marquee assignment updated:', updatedItem);
+          },
+          error: (err) => {
+            console.error('Error updating marquee assignment:', err);
+            // Revert the UI change on error
+            this.marquees[index].assigned = !this.marquees[index].assigned;
+          }
+        });
+      }
+      */
+    }
   }
 
   showJobDetails(job: JobListing): void {
@@ -122,7 +220,7 @@ export class JobDashboardComponent implements OnInit {
       location: job.location,
       description: job.description,
       date: job.day,
-      status: "Pending",
+      status: job.status || "Pending",
       assignedTo: ["John Doe", "Jane Smith"],
       equipment: ["20x50 Marquee", "30x60 Marquee", "6 Portaloos"]
     };
@@ -139,5 +237,33 @@ export class JobDashboardComponent implements OnInit {
         console.log('Edit job:', job);
       }
     });
+  }
+
+  handleEventSelected(event: any): void {
+    console.log('Selected event:', event);
+
+    // Convert event to job format and show details
+    const job: JobListing = {
+      id: event.id,
+      location: event.location || event.name,
+      description: event.description || '',
+      day: new Date(event.date).toLocaleDateString('en-US', { weekday: 'long' }) as any
+    };
+
+    this.showJobDetails(job);
+  }
+
+  isMobileView(): boolean {
+    return this.screenWidth < 768;
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  createNewEvent(): void {
+    // Logic to open a dialog for creating a new event
+    console.log('Creating new event');
+    // In a real app, you would open a dialog or navigate to a create form
   }
 }
