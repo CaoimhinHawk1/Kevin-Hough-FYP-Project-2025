@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../environment/environment';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -11,21 +10,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 export class ApiService {
   private apiUrl = environment.apiUrl;
 
-  constructor(
-    private http: HttpClient,
-    private afAuth: AngularFireAuth
-  ) {}
-
-  // Helper method to get auth token
-  private async getAuthHeaders(): Promise<HttpHeaders> {
-    const user = await this.afAuth.currentUser;
-    const token = user ? await user.getIdToken() : '';
-
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
+  constructor(private http: HttpClient) {}
 
   // Generic error handler
   private handleError(error: any) {
@@ -35,100 +20,79 @@ export class ApiService {
 
   // EVENTS API
   getEvents(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/events`)
+    return this.http.get(`${this.apiUrl}/events`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   getEvent(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/events/${id}`)
+    return this.http.get(`${this.apiUrl}/events/${id}`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   createEvent(eventData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/events`, eventData)
+    return this.http.post(`${this.apiUrl}/events`, eventData, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   updateEvent(id: string, eventData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/events/${id}`, eventData)
+    return this.http.put(`${this.apiUrl}/events/${id}`, eventData, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   deleteEvent(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/events/${id}`)
+    return this.http.delete(`${this.apiUrl}/events/${id}`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   // CUSTOMERS API
   getCustomers(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/customers`)
+    return this.http.get(`${this.apiUrl}/customers`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   getCustomer(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/customers/${id}`)
+    return this.http.get(`${this.apiUrl}/customers/${id}`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   createCustomer(customerData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/customers`, customerData)
+    return this.http.post(`${this.apiUrl}/customers`, customerData, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   updateCustomer(id: string, customerData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/customers/${id}`, customerData)
+    return this.http.put(`${this.apiUrl}/customers/${id}`, customerData, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   deleteCustomer(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/customers/${id}`)
+    return this.http.delete(`${this.apiUrl}/customers/${id}`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   // ITEMS API
   getItems(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/items`)
+    return this.http.get(`${this.apiUrl}/items`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   getItem(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/items/${id}`)
+    return this.http.get(`${this.apiUrl}/items/${id}`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   createItem(itemData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/items`, itemData)
+    return this.http.post(`${this.apiUrl}/items`, itemData, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   updateItem(id: string, itemData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/items/${id}`, itemData)
+    return this.http.put(`${this.apiUrl}/items/${id}`, itemData, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   deleteItem(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/items/${id}`)
-      .pipe(catchError(this.handleError));
-  }
-
-  // AUTH API
-  login(credentials: { email: string, password: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials)
-      .pipe(catchError(this.handleError));
-  }
-
-  register(userData: { email: string, password: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, userData)
-      .pipe(catchError(this.handleError));
-  }
-
-  logout(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/logout`, {})
-      .pipe(catchError(this.handleError));
-  }
-
-  resetPassword(email: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/reset-password`, { email })
+    return this.http.delete(`${this.apiUrl}/items/${id}`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 }

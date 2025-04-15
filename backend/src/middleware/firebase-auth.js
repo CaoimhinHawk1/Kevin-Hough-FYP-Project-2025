@@ -1,3 +1,4 @@
+// backend/src/middleware/firebase-auth.js
 const { admin } = require('../config/firebase');
 
 /**
@@ -5,44 +6,40 @@ const { admin } = require('../config/firebase');
  * This can be used to protect routes that require authentication
  */
 const verifyFirebaseToken = async (req, res, next) => {
+    console.log('Verifying Firebase token');
+
+    // Get token from cookies first (preferred method)
+    const idToken = req.cookies?.access_token;
+
+    // Check authorization header as fallback
     const authHeader = req.headers.authorization;
+    let headerToken;
 
-    // Check if the Authorization header exists
-    if (!authHeader) {
-        // Check for token in cookies as a fallback
-        const idToken = req.cookies?.access_token;
-        if (!idToken) {
-            return res.status(401).json({ error: 'No authorization token provided' });
-        }
-
-        try {
-            const decodedToken = await admin.auth().verifyIdToken(idToken);
-            req.user = decodedToken;
-            return next();
-        } catch (error) {
-            console.error('Error verifying token from cookie:', error);
-            return res.status(403).json({ error: 'Invalid or expired token' });
+    if (authHeader) {
+        const [bearer, token] = authHeader.split(' ');
+        if (bearer === 'Bearer' && token) {
+            headerToken = token;
         }
     }
 
-    // Extract the token from the Authorization header
-    const [bearer, token] = authHeader.split(' ');
-
-    if (bearer !== 'Bearer' || !token) {
-        return res.status(401).json({ error: 'Invalid authorization format' });
+    // No token in either place
+    if (!idToken && !headerToken) {
+        console.log('No token provided in cookies or headers');
+        return res.status(401).json({ error: 'No authorization token provided' });
     }
 
     try {
-        // Verify the token with Firebase Admin
+        // Try cookie token first, then header token
+        const token = idToken || headerToken;
+        console.log('Found token, verifying...');
+
         const decodedToken = await admin.auth().verifyIdToken(token);
+        console.log('Token verified successfully for user:', decodedToken.uid);
 
-        // Add the decoded token to the request
         req.user = decodedToken;
-
-        // Continue to the next middleware or route handler
-        next();
+        return next();
     } catch (error) {
-        console.error('Error verifying Firebase token:', error);
+        console.error('Error verifying token:', error);
         return res.status(403).json({ error: 'Invalid or expired token' });
     }
 };
@@ -69,23 +66,23 @@ const requireAdmin = (req, res, next) => {
  * Will set req.user if a token is provided, but won't reject requests without tokens
  */
 const optionalAuth = async (req, res, next) => {
-    const authHeader = req.headers.authorization;
     const cookieToken = req.cookies?.access_token;
+    const authHeader = req.headers.authorization;
 
-    if (!authHeader && !cookieToken) {
+    if (!cookieToken && !authHeader) {
         return next();
     }
 
     try {
         let token;
 
-        if (authHeader) {
+        if (cookieToken) {
+            token = cookieToken;
+        } else if (authHeader) {
             const [bearer, authToken] = authHeader.split(' ');
             if (bearer === 'Bearer' && authToken) {
                 token = authToken;
             }
-        } else if (cookieToken) {
-            token = cookieToken;
         }
 
         if (token) {

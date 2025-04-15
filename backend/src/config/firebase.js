@@ -1,3 +1,4 @@
+// backend/src/config/firebase.js
 require("dotenv").config();
 const firebase = require("firebase/app");
 const admin = require('firebase-admin');
@@ -13,8 +14,9 @@ const {
     signInWithEmailAndPassword,
     signOut,
     sendEmailVerification,
-    sendPasswordResetEmail
-
+    sendPasswordResetEmail,
+    signInWithCredential,
+    GoogleAuthProvider
 } = require("firebase/auth") ;
 
 const firebaseConfig = {
@@ -33,6 +35,8 @@ module.exports = {
     signOut,
     sendEmailVerification,
     sendPasswordResetEmail,
+    signInWithCredential,
+    GoogleAuthProvider,
     admin
 };
 

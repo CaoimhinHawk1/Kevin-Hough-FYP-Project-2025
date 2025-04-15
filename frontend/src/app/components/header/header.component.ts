@@ -1,13 +1,17 @@
+// frontend/src/app/components/header/header.component.ts
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router, RouterLink } from "@angular/router";
 import { NavigationService } from "../../../services/navigation.service";
 import { Observable } from "rxjs";
-import { LoginComponent } from "../login/login.component";
+import { AuthService, AuthUser } from "../../../services/auth.service";
+import { MatButtonModule } from "@angular/material/button";
 
 @Component({
-    selector: "app-header",
-    template: `
+  selector: "app-header",
+  standalone: true,
+  imports: [CommonModule, RouterLink, MatButtonModule],
+  template: `
     <header
       class="fixed top-0 left-0 right-0 z-50 flex overflow-hidden flex-wrap gap-2 items-center p-1 bg-white border-b border-zinc-300"
     >
@@ -28,12 +32,22 @@ import { LoginComponent } from "../login/login.component";
         <button class="gap-2 self-stretch p-2 rounded-lg">Settings</button>
       </nav>
       <div class="flex gap-3 items-center self-stretch my-auto text-base leading-none text-stone-900 w-[178px]">
-        <app-login></app-login>
+        <!-- Show login/register when not authenticated -->
+        <ng-container *ngIf="!(isAuthenticated$ | async)">
+          <button mat-button routerLink="/login">Login</button>
+          <button mat-raised-button color="primary" routerLink="/register">Register</button>
+        </ng-container>
+
+        <!-- Show user info and logout when authenticated -->
+        <ng-container *ngIf="isAuthenticated$ | async">
+          <span class="text-sm mr-2">{{ (currentUser$ | async)?.displayName || 'User' }}</span>
+          <button mat-button (click)="logout()">Logout</button>
+        </ng-container>
       </div>
     </header>
   `,
-    styles: [
-        `
+  styles: [
+    `
       :host {
         display: block;
         height: 56px;
@@ -43,22 +57,39 @@ import { LoginComponent } from "../login/login.component";
         width: 100%;
       }
     `,
-    ],
-    imports: [CommonModule, RouterLink, LoginComponent]
+  ],
 })
 export class HeaderComponent implements OnInit {
   isDashboard$: Observable<boolean>;
+  isAuthenticated$: Observable<boolean>;
+  currentUser$: Observable<AuthUser | null>;
 
   constructor(
     private router: Router,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private authService: AuthService
   ) {
     this.isDashboard$ = this.navigationService.isDashboardPage$;
+    this.isAuthenticated$ = this.authService.isAuthenticated();
+    this.currentUser$ = this.authService.currentUser$;
   }
 
   ngOnInit() {
     this.router.events.subscribe(() => {
       this.navigationService.setDashboardPage(this.router.url === '/dashboard');
+    });
+  }
+
+  logout() {
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: (error) => {
+        console.error('Logout error:', error);
+        // Even on error, redirect to login
+        this.router.navigate(['/login']);
+      }
     });
   }
 }

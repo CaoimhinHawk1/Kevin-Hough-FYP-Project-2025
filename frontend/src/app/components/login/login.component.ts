@@ -1,5 +1,6 @@
+// frontend/src/app/components/login/login.component.ts
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, AsyncPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -10,21 +11,24 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { RouterLink } from '@angular/router';
 
 @Component({
-    selector: 'app-login',
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatButtonModule,
-        MatInputModule,
-        MatFormFieldModule,
-        MatCardModule,
-        MatIconModule,
-        MatProgressSpinnerModule,
-        MatDividerModule
-    ],
-    template: `
+  selector: 'app-login',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatCardModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatDividerModule
+  ],
+  template: `
     <div class="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] p-4 bg-gray-50">
       <mat-card class="w-full max-w-md p-6">
         <mat-card-header class="justify-center mb-4">
@@ -76,21 +80,26 @@ import { MatDividerModule } from '@angular/material/divider';
             </button>
           </form>
 
-          <mat-divider class="my-4"></mat-divider>
+          <!-- Divider -->
+          <div class="flex items-center my-4">
+            <div class="flex-1 border-t border-gray-300"></div>
+            <div class="px-3 text-sm text-gray-500">OR</div>
+            <div class="flex-1 border-t border-gray-300"></div>
+          </div>
 
           <!-- Google Login Button -->
           <button
             mat-stroked-button
-            class="w-full mb-4"
+            class="w-full mb-4 flex items-center justify-center gap-2"
             (click)="loginWithGoogle()"
             [disabled]="loading"
           >
-            <img src="assets/images/google-logo.png" alt="Google" class="h-5 w-5 mr-2">
-            Login with Google
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
+            <span>Sign in with Google</span>
           </button>
 
           <!-- Register Link -->
-          <div class="text-center">
+          <div class="text-center mt-4">
             <span class="text-sm">Don't have an account? </span>
             <a routerLink="/register" class="text-[#6750A4] cursor-pointer text-sm">
               Register
@@ -100,7 +109,7 @@ import { MatDividerModule } from '@angular/material/divider';
       </mat-card>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
     }
@@ -121,7 +130,7 @@ export class LoginComponent implements OnInit {
   hidePassword = true;
 
   constructor(
-    public auth: AuthService,
+    private authService: AuthService,
     private fb: FormBuilder,
     private router: Router
   ) {
@@ -133,14 +142,16 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     // Check if already logged in
-    this.auth.isLoggedIn().subscribe(isLoggedIn => {
-      if (isLoggedIn) {
-        this.router.navigate(['/dashboard']);
+    this.authService.isAuthenticated().subscribe(isAuthenticated => {
+      console.log('LoginComponent: Authentication check result:', isAuthenticated);
+      if (isAuthenticated) {
+        console.log('LoginComponent: User already authenticated, redirecting to job dashboard');
+        this.router.navigate(['/job-dashboard']);
       }
     });
   }
 
-  async onSubmit(): Promise<void> {
+  onSubmit(): void {
     if (this.loginForm.invalid) {
       return;
     }
@@ -148,34 +159,22 @@ export class LoginComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    try {
-      const { email, password } = this.loginForm.value;
-      await this.auth.loginWithEmailPassword(email, password);
-      // Navigation is handled in the auth service
-    } catch (error: any) {
-      console.error('Login error:', error);
-      this.errorMessage = this.getErrorMessage(error);
-    } finally {
-      this.loading = false;
-    }
+    const { email, password } = this.loginForm.value;
+
+    this.authService.login(email, password).subscribe({
+      next: (response) => {
+        this.loading = false;
+        // Explicitly navigate to job dashboard after successful login
+        this.router.navigate(['/job-dashboard']);
+      },
+      error: (error) => {
+        this.loading = false;
+        this.errorMessage = error.error?.message || 'Login failed. Please check your credentials.';
+      }
+    });
   }
 
-  async loginWithGoogle(): Promise<void> {
-    this.loading = true;
-    this.errorMessage = '';
-
-    try {
-      await this.auth.loginWithGoogle();
-      // Navigation is handled in the auth service
-    } catch (error: any) {
-      console.error('Google login error:', error);
-      this.errorMessage = this.getErrorMessage(error);
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  async forgotPassword(): Promise<void> {
+  forgotPassword(): void {
     const email = this.loginForm.get('email')?.value;
 
     if (!email) {
@@ -183,28 +182,34 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    try {
-      await this.auth.resetPassword(email);
-      alert('Password reset email sent. Please check your inbox.');
-    } catch (error: any) {
-      console.error('Reset password error:', error);
-      this.errorMessage = this.getErrorMessage(error);
-    }
+    this.loading = true;
+    this.authService.resetPassword(email).subscribe({
+      next: () => {
+        this.loading = false;
+        alert('Password reset email sent. Please check your inbox.');
+      },
+      error: (error) => {
+        this.loading = false;
+        this.errorMessage = error.error?.message || 'Failed to send reset email.';
+      }
+    });
   }
 
-  private getErrorMessage(error: any): string {
-    if (error.code === 'auth/user-not-found') {
-      return 'No account found with this email address';
-    } else if (error.code === 'auth/wrong-password') {
-      return 'Invalid password';
-    } else if (error.code === 'auth/invalid-email') {
-      return 'Invalid email format';
-    } else if (error.code === 'auth/user-disabled') {
-      return 'This account has been disabled';
-    } else if (error.code === 'auth/too-many-requests') {
-      return 'Too many failed login attempts. Please try again later or reset your password';
-    }
+  loginWithGoogle(): void {
+    this.loading = true;
+    this.errorMessage = '';
 
-    return error.message || 'An unexpected error occurred';
+    this.authService.loginWithGoogle().subscribe({
+      next: () => {
+        this.loading = false;
+        // Explicitly navigate to job dashboard after successful Google login
+        this.router.navigate(['/job-dashboard']);
+      },
+      error: (error) => {
+        this.loading = false;
+        console.error('Google login error:', error);
+        this.errorMessage = error.message || 'Failed to sign in with Google. Please try again.';
+      }
+    });
   }
 }
