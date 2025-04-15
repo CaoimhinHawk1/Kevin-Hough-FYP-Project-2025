@@ -1,6 +1,8 @@
+// backend/src/models/index.js
 const Customer = require('./customerModel');
 const Event = require('./eventModel');
 const Item = require('./itemModel');
+const User = require('./userModel');
 
 // Set up associations
 Event.belongsTo(Customer);
@@ -12,5 +14,6 @@ Item.belongsToMany(Event, { through: 'EventItems' });
 module.exports = {
   Customer,
   Event,
-  Item
+  Item,
+  User
 };

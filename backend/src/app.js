@@ -26,13 +26,13 @@ app.get('/api/health', (req, res) => {
 });
 
 // Routes
-const authRoutes = require('./routes/index');
+const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 
 // API Routes
-app.use('/', authRoutes); // Firebase auth routes already have /api prefix
+app.use('/api/auth', authRoutes); // New centralized auth routes
 app.use('/api/events', eventRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/items', itemRoutes);
