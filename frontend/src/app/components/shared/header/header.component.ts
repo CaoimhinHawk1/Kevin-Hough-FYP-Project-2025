@@ -1,10 +1,10 @@
-// frontend/src/app/components/header/header.component.ts
+
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router, RouterLink } from "@angular/router";
-import { NavigationService } from "../../../services/navigation.service";
+import { NavigationService } from "../../../../services/navigation.service";
 import { Observable } from "rxjs";
-import { AuthService, AuthUser } from "../../../services/auth.service";
+import { AuthService, AuthUser } from "../../../../services/auth.service";
 import { MatButtonModule } from "@angular/material/button";
 
 @Component({
@@ -17,7 +17,7 @@ import { MatButtonModule } from "@angular/material/button";
     >
       <div class="flex gap-6 items-center self-stretch my-auto w-[169px]">
         <img
-          src="../../../assets/images/logo1.png"
+          src="../../../../assets/images/logo1.png"
           class="object-contain self-stretch my-auto rounded-md aspect-[1.34] w-[100px]"
           alt="Logo"
         />

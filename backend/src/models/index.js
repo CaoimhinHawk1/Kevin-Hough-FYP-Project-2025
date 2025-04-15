@@ -2,7 +2,6 @@
 const Customer = require('./customerModel');
 const Event = require('./eventModel');
 const Item = require('./itemModel');
-const User = require('./userModel');
 
 // Set up associations
 Event.belongsTo(Customer);
@@ -15,5 +14,4 @@ module.exports = {
   Customer,
   Event,
   Item,
-  User
 };

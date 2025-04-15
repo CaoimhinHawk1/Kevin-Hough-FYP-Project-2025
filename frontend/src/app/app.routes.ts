@@ -1,6 +1,5 @@
 // frontend/src/app/app.routes.ts
 import { Routes } from "@angular/router";
-import { JobDashboardComponent } from "./components/job-dashboard/job-dashboard.component";
 import { HomeComponent } from "./components/home/home.component";
 import { LoginComponent } from "./components/login/login.component";
 import { RegisterComponent } from "./components/register/register.component";
@@ -15,10 +14,19 @@ export const routes: Routes = [
   { path: "login", component: LoginComponent },
   { path: "register", component: RegisterComponent },
 
-  // Protected route
+  // Protected routes - lazy loaded
   {
     path: "job-dashboard",
-    component: JobDashboardComponent,
+    loadComponent: () => import('./components/job-dashboard/job-dashboard.component')
+      .then(m => m.JobDashboardComponent),
+    canActivate: [AuthGuard]
+  },
+
+  // Inventory Dashboard
+  {
+    path: "inventory",
+    loadComponent: () => import('./components/inventory/inventory-dashboard.component')
+      .then(m => m.InventoryDashboardComponent),
     canActivate: [AuthGuard]
   },
 
