@@ -4,9 +4,6 @@ import { HomeComponent } from "./components/home/home.component";
 import { LoginComponent } from "./components/login/login.component";
 import { RegisterComponent } from "./components/register/register.component";
 import { AuthGuard } from "../guards/auth.guard";
-import { UserManagementComponent } from "./components/admin/user-management/user-management.component";
-import {TaskDashboardComponent} from "./components/task-dashboard/task-dashboard.component";
-import { AdminGuard } from "../guards/admin.guard";
 
 export const routes: Routes = [
   // Home is accessible to everyone
@@ -32,22 +29,6 @@ export const routes: Routes = [
       .then(m => m.InventoryDashboardComponent),
     canActivate: [AuthGuard]
   },
-
-  {
-    path: "admin",
-    canActivate: [AuthGuard, AdminGuard],
-    children: [
-      { path: "", redirectTo: "users", pathMatch: "full" },
-      { path: "users", component: UserManagementComponent }
-    ]
-  },
-
-  {
-    path: "tasks",
-    component: TaskDashboardComponent,
-    canActivate: [AuthGuard]
-  },
-
 
   // Handle wildcard route - page not found
   { path: "**", redirectTo: "/home" }
