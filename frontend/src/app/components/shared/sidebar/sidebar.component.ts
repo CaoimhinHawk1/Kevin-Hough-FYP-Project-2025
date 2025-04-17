@@ -1,10 +1,9 @@
 // frontend/src/app/components/shared/sidebar/sidebar.component.ts
-import {Component, OnInit} from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {NavigationEnd, Router, RouterLink, RouterLinkActive} from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../../services/auth.service';
-import {filter} from "rxjs/operators";
 
 @Component({
   selector: 'app-sidebar',
@@ -31,38 +30,46 @@ import {filter} from "rxjs/operators";
           </div>
           <nav>
             <a routerLink="/job-dashboard"
-               class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-               [class.bg-purple-50]="isActive('/job-dashboard')"
-               [class.text-purple-700]="isActive('/job-dashboard')"
-               [class.border-r-4]="isActive('/job-dashboard')"
-               [class.border-purple-700]="isActive('/job-dashboard')"
-            >
+               routerLinkActive="bg-gray-100"
+               class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors">
               <mat-icon class="text-gray-600">dashboard</mat-icon>
-              <span>Dashboard</span>
+              <span>Job Dashboard</span>
             </a>
 
             <a routerLink="/inventory"
-               class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-               [class.bg-purple-50]="isActive('/inventory')"
-               [class.text-purple-700]="isActive('/inventory')"
-               [class.border-r-4]="isActive('/inventory')"
-               [class.border-purple-700]="isActive('/inventory')"
-            >
-              <mat-icon class="text-gray-600">inventory</mat-icon>
+               routerLinkActive="bg-gray-100"
+               class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors">
+              <mat-icon class="text-gray-600">inventory_2</mat-icon>
               <span>Inventory Management</span>
             </a>
           </nav>
+        </div>
+
+        <!-- Resources Section -->
+        <div class="mb-6">
+          <div class="px-4 py-1 text-black/40 font-inter text-sm">
+            Resources
+          </div>
           <nav>
-            <a
-              routerLink="/tasks"
-              class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-              [class.bg-purple-50]="isActive('/tasks')"
-              [class.text-purple-700]="isActive('/tasks')"
-              [class.border-r-4]="isActive('/tasks')"
-              [class.border-purple-700]="isActive('/tasks')"
-            >
-              <mat-icon class="mr-3 text-current">task</mat-icon>
-              <span>Task Management</span>
+            <a routerLink="/customers"
+               routerLinkActive="bg-gray-100"
+               class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors">
+              <mat-icon class="text-gray-600">people</mat-icon>
+              <span>Customers</span>
+            </a>
+
+            <a routerLink="/events"
+               routerLinkActive="bg-gray-100"
+               class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors">
+              <mat-icon class="text-gray-600">event</mat-icon>
+              <span>Events</span>
+            </a>
+
+            <a routerLink="/vehicles"
+               routerLinkActive="bg-gray-100"
+               class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors">
+              <mat-icon class="text-gray-600">local_shipping</mat-icon>
+              <span>Vehicles</span>
             </a>
           </nav>
         </div>
@@ -110,52 +117,16 @@ import {filter} from "rxjs/operators";
     }
   `]
 })
-export class SidebarComponent implements OnInit {
-  currentUser: any;
-  currentUrl: string = '';
-
-  constructor(
-    private router: Router,
-    private authService: AuthService
-  ) {
-    // Get current authenticated user
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-    });
-  }
-
-  ngOnInit(): void {
-    // Track current URL for active states
-    this.currentUrl = this.router.url;
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      this.currentUrl = event.url;
-    });
-  }
-
-  isActive(route: string): boolean {
-    return this.currentUrl.startsWith(route);
-  }
-
-  getUserInitials(): string {
-    if (!this.currentUser || !this.currentUser.displayName) {
-      return 'U';
-    }
-
-    const names = this.currentUser.displayName.split(' ');
-    if (names.length === 1) {
-      return names[0][0].toUpperCase();
-    }
-
-    return (names[0][0] + names[names.length - 1][0]).toUpperCase();
-  }
+export class SidebarComponent {
+  constructor(private authService: AuthService, private router: Router) {}
 
   logout(): void {
     this.authService.logout().subscribe({
-      next: () => this.router.navigate(['/login']),
-      error: (err) => {
-        console.error('Logout error:', err);
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: (error: any) => {
+        console.error('Logout error:', error);
         this.router.navigate(['/login']);
       }
     });
