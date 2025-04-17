@@ -7,6 +7,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { JobModalComponent } from "./job-modal/job-model.component";
 import { Subject, takeUntil } from "rxjs";
 import {JobCalendarComponent} from "./job-calendar/job-calendar.component";
+import { AuthService } from "../../../services/auth.service";
+import {DashboardLayoutComponent} from "../shared/dashboard-layout/dashboard-layout.component";
 
 interface JobListing {
   id?: string;
@@ -42,10 +44,11 @@ interface Vehicle {
 }
 
 @Component({
-    selector: "app-job-dashboard",
-    templateUrl: "./job-dashboard.component.html",
-    styleUrls: ["./job-dashboard.component.css"],
-    imports: [CommonModule, FormsModule, JobCalendarComponent]
+  selector: "app-job-dashboard",
+  templateUrl: "./job-dashboard.component.html",
+  styleUrls: ["./job-dashboard.component.css"],
+  imports: [CommonModule, FormsModule, JobCalendarComponent, DashboardLayoutComponent],
+  standalone: true
 })
 export class JobDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -65,7 +68,6 @@ export class JobDashboardComponent implements OnInit, OnDestroy {
   marquees: Marquee[] = [];
   vehicles: Vehicle[] = [];
 
-
   @HostListener("window:resize", ["$event"])
   onResize(event: any) {
     this.screenWidth = window.innerWidth;
@@ -74,12 +76,19 @@ export class JobDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private navigationService: NavigationService,
     private apiService: ApiService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.navigationService.setDashboardPage(true);
     this.loadData();
+
+    // Check authentication
+    this.authService.isAuthenticated().subscribe(isAuthenticated => {
+      console.log('JobDashboardComponent: Authentication check result:', isAuthenticated);
+      // No need to redirect, the AuthGuard will handle that
+    });
   }
 
   ngOnDestroy(): void {
@@ -188,7 +197,6 @@ export class JobDashboardComponent implements OnInit, OnDestroy {
   getJobsForDay(day: string): JobListing[] {
     return this.jobListings.filter((job) => job.day === day);
   }
-
 
   toggleMarqueeAssignment(index: number): void {
     if (this.marquees[index]) {

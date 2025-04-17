@@ -29,13 +29,13 @@ app.get('/api/health', (req, res) => {
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const customerRoutes = require('./routes/customerRoutes');
-const itemRoutes = require('./routes/itemRoutes');
+const inventoryRoutes = require('./routes/inventoryRoutes');
 
 // API Routes
 app.use('/api/auth', authRoutes); // New centralized auth routes
 app.use('/api/events', eventRoutes);
 app.use('/api/customers', customerRoutes);
-app.use('/api/items', itemRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
