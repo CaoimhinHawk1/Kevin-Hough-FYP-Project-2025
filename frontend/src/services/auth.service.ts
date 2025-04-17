@@ -13,6 +13,8 @@ export interface AuthUser {
   email: string;
   displayName?: string | null;
   emailVerified: boolean;
+  role?: string;       // Added role
+  isAdmin?: boolean;   // Added admin flag
 }
 
 @Injectable({
@@ -20,6 +22,7 @@ export interface AuthUser {
 })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
+  private adminApiUrl = `${environment.apiUrl}/admin/users`;
   private currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
   private auth;
 
@@ -144,6 +147,33 @@ export class AuthService {
   }
 
   /**
+   * Check if user has admin role
+   */
+  isAdmin(): Observable<boolean> {
+    return this.currentUser$.pipe(
+      map(user => !!user && !!user.isAdmin)
+    );
+  }
+
+  /**
+   * Check if user has a specific role
+   */
+  hasRole(role: string): Observable<boolean> {
+    const roleHierarchy: {[key: string]: number} = {
+      'ADMIN': 3,
+      'MANAGER': 2,
+      'USER': 1
+    };
+
+    return this.currentUser$.pipe(
+      map(user => {
+        if (!user || !user.role) return false;
+        return roleHierarchy[user.role] >= roleHierarchy[role];
+      })
+    );
+  }
+
+  /**
    * Get the current authenticated user
    */
   getCurrentUser(): AuthUser | null {
@@ -209,5 +239,39 @@ export class AuthService {
   private clearCurrentUser(): void {
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
+  }
+
+  // Admin-specific methods
+
+  /**
+   * Get all users (admin only)
+   */
+  getAllUsers(): Observable<AuthUser[]> {
+    return this.http.get<AuthUser[]>(`${this.adminApiUrl}`, { withCredentials: true });
+  }
+
+  /**
+   * Get user by ID (admin only)
+   */
+  getUserById(id: string): Observable<AuthUser> {
+    return this.http.get<AuthUser>(`${this.adminApiUrl}/${id}`, { withCredentials: true });
+  }
+
+  /**
+   * Update user role (admin only)
+   */
+  updateUserRole(userId: string, role: string, isAdmin: boolean): Observable<any> {
+    return this.http.patch<any>(
+      `${this.adminApiUrl}/${userId}/role`,
+      { role, isAdmin },
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * Delete user (admin only)
+   */
+  deleteUser(userId: string): Observable<any> {
+    return this.http.delete<any>(`${this.adminApiUrl}/${userId}`, { withCredentials: true });
   }
 }
