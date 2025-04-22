@@ -2,7 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const cookieParser = require('cookie-parser');
-const sequelize = require('./config/db');
+const path = require('path');
+const prisma = require('./services/prisma.service');
+const { errorHandler, notFoundHandler } = require('./middleware/error-handler');
+
+// Test database connection
+prisma.$connect()
+    .then(() => console.log('Connected to PostgreSQL database'))
+    .catch(err => console.error('Database connection error:', err));
 
 const app = express();
 
@@ -15,49 +22,54 @@ app.use(cors({
 }));
 
 // File uploads setup
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB file size limit
+});
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // API health check route
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'API is running' });
+  res.status(200).json({
+    status: 'OK',
+    message: 'API is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
-// Routes
+// Load routes
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
+const taskRoutes = require('./routes/taskRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // API Routes
-app.use('/api/auth', authRoutes); // New centralized auth routes
+app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/users', userRoutes);
+
+// Admin routes
+const userAdminRoutes = require('./routes/userAdminRoutes');
+app.use('/api/admin/users', userAdminRoutes);
+
+// Handle 404s
+app.use(notFoundHandler);
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Global error handler:', err);
+app.use(errorHandler);
 
-  // Handle specific error types
-  if (err.name === 'UnauthorizedError') {
-    return res.status(401).json({ message: 'Invalid token or not authenticated' });
-  }
-
-  // Default error response
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
-    message: err.message || 'Internal Server Error',
-    error: process.env.NODE_ENV === 'production' ? null : err.stack
-  });
-});
-
-// Database synchronization
-sequelize
-    .sync({ force: false, alter: process.env.NODE_ENV !== 'production' })
-    .then(() => console.log('Database synced'))
-    .catch((err) => console.error('Database sync error:', err));
-
+// Export for server.js
 module.exports = app;

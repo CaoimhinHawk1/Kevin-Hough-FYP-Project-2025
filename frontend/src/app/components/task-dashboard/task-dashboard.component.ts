@@ -89,25 +89,6 @@ export class TaskDashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  loadTasks(): void {
-    this.loading = true;
-
-    this.taskService.getAllTasks()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (tasks) => {
-          this.tasks = tasks;
-          this.filterTasks();
-          this.calculateStats();
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Error loading tasks:', error);
-          this.loading = false;
-        }
-      });
-  }
-
   calculateStats(): void {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -326,20 +307,77 @@ export class TaskDashboardComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result && result.task) {
+        console.log('Task dialog returned with:', result);
+
+        // Show loading indicator
+        this.loading = true;
+
         // Create task in the backend
         this.taskService.createTask(result.task)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (createdTask) => {
+              console.log('Task created successfully:', createdTask);
+
               // Add to local task array
               this.tasks.push(createdTask);
               this.calculateStats();
               this.filterTasks();
+              this.loading = false;
+
+              // Show success message
+              this.showSnackBar('Task created successfully');
             },
-            error: (error) => console.error('Error creating task:', error)
+            error: (error) => {
+              console.error('Error creating task:', error);
+              this.loading = false;
+
+              // Show error message
+              this.showSnackBar('Error creating task: ' + (error.message || 'Unknown error'));
+            }
           });
       }
     });
+  }
+
+// Add a method for displaying feedback to the user
+  private showSnackBar(message: string): void {
+    // This would typically use Angular Material's MatSnackBar
+    // But for a simpler solution, we can use a basic alert for now
+    // In a full implementation, you would inject and use MatSnackBar
+    console.log('Task feedback:', message);
+
+    // Uncomment this when you have MatSnackBar imported and injected
+    /*
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
+    */
+  }
+
+// Also update the loadTasks method to handle errors better
+  loadTasks(): void {
+    this.loading = true;
+
+    this.taskService.getAllTasks()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (tasks) => {
+          console.log('Tasks loaded successfully:', tasks);
+          this.tasks = tasks;
+          this.filterTasks();
+          this.calculateStats();
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error loading tasks:', error);
+          this.loading = false;
+          // Optionally show error message to user
+          this.showSnackBar('Failed to load tasks. Please try again.');
+        }
+      });
   }
 
   getPriorityClass(priority: string): string {

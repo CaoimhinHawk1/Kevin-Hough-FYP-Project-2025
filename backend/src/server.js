@@ -1,3 +1,4 @@
+// backend/server.js
 const app = require('./app');
 const dotenv = require('dotenv');
 const http = require('http');
@@ -34,15 +35,26 @@ server.listen(PORT, () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-// Handle uncaught exceptions and unhandled promise rejections
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
-  // Keep the process alive but log the error
+  console.error('Stack trace:', error.stack);
+
+  // In production, we might want to restart the process, but for development, keep it alive
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Exiting due to uncaught exception in production');
+    process.exit(1);
+  }
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Promise Rejection:', reason);
-  // Keep the process alive but log the error
+  console.error('Promise:', promise);
+
+  // In production, treat unhandled rejections as uncaught exceptions
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Exiting due to unhandled promise rejection in production');
+    process.exit(1);
+  }
 });
 
 module.exports = server; // Export for testing
