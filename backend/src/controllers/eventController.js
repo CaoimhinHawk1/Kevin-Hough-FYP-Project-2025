@@ -1,4 +1,4 @@
-const { Event, Customer, Item } = require('../models/');
+const { Event, Customer, InventoryItem } = require('../models/');
 const DbService = require('../services/db.service');
 const { ApiError } = require('../middleware/error-handler');
 
@@ -10,37 +10,15 @@ const { ApiError } = require('../middleware/error-handler');
  */
 exports.getAllEvents = async (req, res, next) => {
   try {
-    const { startDate, endDate, status } = req.query;
-
-    // Build query options
-    const options = {
-      include: [Customer, Item],
-      order: [['date', 'ASC']]
+    const events ={
+      include: [Customer, InventoryItem],
+      order: [['startDate', 'ASC']]  // or whatever your date field is
     };
 
-    // Add filters if provided
-    if (startDate || endDate) {
-      options.where = options.where || {};
-      options.where.date = {};
-
-      if (startDate) {
-        options.where.date.$gte = new Date(startDate);
-      }
-
-      if (endDate) {
-        options.where.date.$lte = new Date(endDate);
-      }
-    }
-
-    if (status) {
-      options.where = options.where || {};
-      options.where.status = status;
-    }
-
-    const events = await Event.findAll(options);
     res.status(200).json(events);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    console.error('Error in getAllEvents:', err);
+    next(err);
   }
 };
 
@@ -126,11 +104,7 @@ exports.deleteEvent = async (req, res, next) => {
     const event = await DbService.findByIdOrFail(Event, req.params.id);
 
     await DbService.transaction(async (transaction) => {
-      // Remove associations first
-      await event.setCustomers([], { transaction });
-      await event.setItems([], { transaction });
 
-      // Delete the event
       await event.destroy({ transaction });
     });
 

@@ -9,6 +9,8 @@ import { Subject, takeUntil } from "rxjs";
 import {JobCalendarComponent} from "./job-calendar/job-calendar.component";
 import { AuthService } from "../../../services/auth.service";
 import {DashboardLayoutComponent} from "../shared/dashboard-layout/dashboard-layout.component";
+import { TaskService, Task } from '../../../services/task.service';
+import { Router } from '@angular/router';
 
 interface JobListing {
   id?: string;
@@ -53,6 +55,9 @@ interface Vehicle {
 export class JobDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
+  weeklyTasks: Task[] = [];
+  loadingTasks = false;
+  taskError = '';
   searchQuery: string = "";
   activeView: "weekly" | "monthly" = "weekly";
   vehicleView: "today" | "weekly" = "today";
@@ -77,8 +82,10 @@ export class JobDashboardComponent implements OnInit, OnDestroy {
     private navigationService: NavigationService,
     private apiService: ApiService,
     private dialog: MatDialog,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private taskService: TaskService,
+    private router: Router
+) {}
 
   ngOnInit(): void {
     this.navigationService.setDashboardPage(true);
@@ -104,12 +111,18 @@ export class JobDashboardComponent implements OnInit, OnDestroy {
     this.apiService.getEvents()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (events) => {
-          // Convert events to job listings format
+        next: (response) => {
+          console.log('API response:', response);
+
+          const events = Array.isArray(response) ? response :
+            response?.data ? (Array.isArray(response.data) ? response.data : []) :
+              [];
+
           this.jobListings = events.map((event: any) => {
             const date = new Date(event.date);
             const dayOfWeek = date.getDay();
             const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
 
             return {
               id: event.id,
@@ -198,29 +211,6 @@ export class JobDashboardComponent implements OnInit, OnDestroy {
     return this.jobListings.filter((job) => job.day === day);
   }
 
-  toggleMarqueeAssignment(index: number): void {
-    if (this.marquees[index]) {
-      this.marquees[index].assigned = !this.marquees[index].assigned;
-
-      // In a real app, you would call the API to update the item
-      /*
-      if (this.marquees[index].id) {
-        this.apiService.updateItem(this.marquees[index].id!, {
-          assigned: this.marquees[index].assigned
-        }).subscribe({
-          next: (updatedItem) => {
-            console.log('Marquee assignment updated:', updatedItem);
-          },
-          error: (err) => {
-            console.error('Error updating marquee assignment:', err);
-            // Revert the UI change on error
-            this.marquees[index].assigned = !this.marquees[index].assigned;
-          }
-        });
-      }
-      */
-    }
-  }
 
   showJobDetails(job: JobListing): void {
     const modalData: JobModal = {
@@ -259,6 +249,100 @@ export class JobDashboardComponent implements OnInit, OnDestroy {
     };
 
     this.showJobDetails(job);
+  }
+
+  loadWeeklyTasks(): void {
+    this.loadingTasks = true;
+    this.taskError = '';
+
+    // Get today's date
+    const today = new Date();
+
+    // Get date one week from today
+    const nextWeek = new Date();
+    nextWeek.setDate(today.getDate() + 7);
+
+    // Create date filter for the next 7 days
+    const dateFilter = {
+      startDate: today.toISOString().split('T')[0],
+      endDate: nextWeek.toISOString().split('T')[0]
+    };
+
+    this.taskService.getAllTasks(dateFilter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (tasks) => {
+          // Sort by priority and due date
+          this.weeklyTasks = tasks
+            .filter(task => task.status !== 'completed')  // Filter out completed tasks
+            .sort((a, b) => {
+              // First by priority (urgent > high > medium > low)
+              const priorityOrder: { [key: string]: number } = { urgent: 0, high: 1, medium: 2, low: 3 };
+              const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+
+              if (priorityDiff !== 0) return priorityDiff;
+
+              // Then by due date (earliest first)
+              return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+            })
+            .slice(0, 5);  // Limit to 5 tasks for the widget
+
+          this.loadingTasks = false;
+        },
+        error: (error) => {
+          console.error('Error loading tasks:', error);
+          this.taskError = 'Failed to load tasks';
+          this.loadingTasks = false;
+        }
+      });
+  }
+
+  // Helper method for task priority class
+  getTaskPriorityClass(priority: string): string {
+    switch (priority) {
+      case 'urgent': return 'bg-red-500';
+      case 'high': return 'bg-orange-500';
+      case 'medium': return 'bg-blue-500';
+      case 'low': return 'bg-green-500';
+      default: return 'bg-gray-500';
+    }
+  }
+
+  // Helper method for task status class
+  getTaskStatusClass(status: string): string {
+    switch (status) {
+      case 'pending': return 'text-yellow-700 border-yellow-300 bg-yellow-50';
+      case 'in_progress': return 'text-blue-700 border-blue-300 bg-blue-50';
+      case 'completed': return 'text-green-700 border-green-300 bg-green-50';
+      case 'delayed': return 'text-red-700 border-red-300 bg-red-50';
+      default: return 'text-gray-700 border-gray-300 bg-gray-50';
+    }
+  }
+
+  // Format task date
+  formatTaskDate(date: Date): string {
+    const taskDate = new Date(date);
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    // Check if date is today
+    if (taskDate.toDateString() === today.toDateString()) {
+      return 'Today';
+    }
+
+    // Check if date is tomorrow
+    if (taskDate.toDateString() === tomorrow.toDateString()) {
+      return 'Tomorrow';
+    }
+
+    // Otherwise return formatted date
+    return taskDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  // Navigate to task details
+  viewTaskDetails(task: Task): void {
+    this.router.navigate(['/tasks'], { state: { selectedTaskId: task.id } });
   }
 
   isMobileView(): boolean {

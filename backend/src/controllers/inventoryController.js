@@ -1,247 +1,150 @@
 // backend/src/controllers/inventoryController.js
-const { InventoryItem } = require('../models');
+const inventoryRepository = require('../repository/inventoryRepository');
 const { ApiError } = require('../middleware/error-handler');
-const { Op } = require('sequelize');
-const sequelize = require('../config/db');
 
 /**
- * Controller for handling inventory item operations
+ * Get all inventory items with filtering options
  */
-class InventoryController {
-  /**
-   * Get all inventory items with filtering options
-   */
-  async getAllItems(req, res, next) {
-    try {
-      const { type, condition, search } = req.query;
+exports.getAllItems = async (req, res, next) => {
+  console.log('InventoryController.getAllItems called with query:', req.query);
 
-      // Build query options
-      const queryOptions = {
-        where: {},
-        order: [['updatedAt', 'DESC']]
-      };
+  try {
+    // Build filter object from query parameters
+    const filters = {
+      type: req.query.type,
+      condition: req.query.condition,
+      search: req.query.search,
+      maintenance: req.query.maintenance,
+      orderBy: req.query.orderBy,
+      orderDirection: req.query.orderDirection,
+      skip: req.query.skip ? parseInt(req.query.skip) : undefined,
+      take: req.query.take ? parseInt(req.query.take) : undefined
+    };
 
-      // Apply type filter
-      if (type && type !== 'all') {
-        queryOptions.where.type = type;
-      }
+    const items = await inventoryRepository.findAll(filters);
+    console.log(`Retrieved ${items.length} inventory items successfully`);
 
-      // Apply condition filter
-      if (condition && condition !== 'all') {
-        queryOptions.where.condition = condition;
-      }
-
-      // Apply search filter
-      if (search) {
-        queryOptions.where = {
-          ...queryOptions.where,
-          [Op.or]: [
-            { name: { [Op.iLike]: `%${search}%` } },
-            { location: { [Op.iLike]: `%${search}%` } },
-            { notes: { [Op.iLike]: `%${search}%` } }
-          ]
-        };
-      }
-
-      const items = await InventoryItem.findAll(queryOptions);
-      return res.status(200).json(items);
-    } catch (error) {
-      next(error);
-    }
+    res.status(200).json(items);
+  } catch (err) {
+    console.error('Error in InventoryController.getAllItems:', err);
+    next(err);
   }
+};
 
-  /**
-   * Get a single inventory item by ID
-   */
-  async getItemById(req, res, next) {
-    try {
-      const item = await InventoryItem.findByPk(req.params.id);
+/**
+ * Get a single inventory item by ID
+ */
+exports.getItemById = async (req, res, next) => {
+  const itemId = req.params.id;
+  console.log(`InventoryController.getItemById called for item ID: ${itemId}`);
 
-      if (!item) {
-        throw ApiError.notFound(`Inventory item with ID ${req.params.id} not found`);
-      }
+  try {
+    const item = await inventoryRepository.findById(itemId);
 
-      return res.status(200).json(item);
-    } catch (error) {
-      next(error);
+    if (!item) {
+      console.log(`Inventory item with ID ${itemId} not found`);
+      return next(ApiError.notFound(`Inventory item with ID ${itemId} not found`));
     }
+
+    console.log(`Inventory item ${itemId} retrieved successfully`);
+    res.status(200).json(item);
+  } catch (err) {
+    console.error(`Error in InventoryController.getItemById for item ${itemId}:`, err);
+    next(err);
   }
+};
 
-  /**
-   * Create a new inventory item
-   */
-  async createItem(req, res, next) {
-    try {
-      const {
-        name,
-        type,
-        quantity,
-        available,
-        condition,
-        lastMaintenance,
-        nextMaintenance,
-        location,
-        notes,
-        imageUrl
-      } = req.body;
+/**
+ * Create a new inventory item
+ */
+exports.createItem = async (req, res, next) => {
+  console.log('InventoryController.createItem called with body:', JSON.stringify(req.body, null, 2));
 
-      // Validate required fields
-      if (!name || !type) {
-        throw ApiError.badRequest('Name and type are required fields');
-      }
-
-      // Create the item
-      const item = await InventoryItem.create({
-        name,
-        type,
-        quantity: quantity || 1,
-        available: available !== undefined ? available : quantity || 1,
-        condition: condition || 'good',
-        lastMaintenance: lastMaintenance || null,
-        nextMaintenance: nextMaintenance || null,
-        location: location || null,
-        notes: notes || null,
-        imageUrl: imageUrl || null
-      });
-
-      return res.status(201).json(item);
-    } catch (error) {
-      next(error);
+  try {
+    // Validate required fields
+    if (!req.body.name || !req.body.type) {
+      console.log('Missing required fields: name and type must be provided');
+      return next(ApiError.badRequest('Name and type are required fields'));
     }
+
+    // Create the item
+    const item = await inventoryRepository.create(req.body);
+
+    console.log(`Inventory item created successfully with ID: ${item.id}`);
+    res.status(201).json(item);
+  } catch (err) {
+    console.error('Error in InventoryController.createItem:', err);
+    next(err);
   }
+};
 
-  /**
-   * Update an existing inventory item
-   */
-  async updateItem(req, res, next) {
-    try {
-      const item = await InventoryItem.findByPk(req.params.id);
+/**
+ * Update an existing inventory item
+ */
+exports.updateItem = async (req, res, next) => {
+  const itemId = req.params.id;
+  console.log(`InventoryController.updateItem called for item ID: ${itemId}`);
+  console.log('Update data:', JSON.stringify(req.body, null, 2));
 
-      if (!item) {
-        throw ApiError.notFound(`Inventory item with ID ${req.params.id} not found`);
-      }
+  try {
+    // Check if item exists
+    const existingItem = await inventoryRepository.findById(itemId);
 
-      const {
-        name,
-        type,
-        quantity,
-        available,
-        condition,
-        lastMaintenance,
-        nextMaintenance,
-        location,
-        notes,
-        imageUrl
-      } = req.body;
-
-      // Update the item
-      await item.update({
-        name: name !== undefined ? name : item.name,
-        type: type !== undefined ? type : item.type,
-        quantity: quantity !== undefined ? quantity : item.quantity,
-        available: available !== undefined ? available : item.available,
-        condition: condition !== undefined ? condition : item.condition,
-        lastMaintenance: lastMaintenance !== undefined ? lastMaintenance : item.lastMaintenance,
-        nextMaintenance: nextMaintenance !== undefined ? nextMaintenance : item.nextMaintenance,
-        location: location !== undefined ? location : item.location,
-        notes: notes !== undefined ? notes : item.notes,
-        imageUrl: imageUrl !== undefined ? imageUrl : item.imageUrl
-      });
-
-      // Fetch the updated item
-      const updatedItem = await InventoryItem.findByPk(req.params.id);
-      return res.status(200).json(updatedItem);
-    } catch (error) {
-      next(error);
+    if (!existingItem) {
+      console.log(`Inventory item with ID ${itemId} not found`);
+      return next(ApiError.notFound(`Inventory item with ID ${itemId} not found`));
     }
+
+    // Update the item
+    const updatedItem = await inventoryRepository.update(itemId, req.body);
+
+    console.log(`Inventory item ${itemId} updated successfully`);
+    res.status(200).json(updatedItem);
+  } catch (err) {
+    console.error(`Error in InventoryController.updateItem for item ${itemId}:`, err);
+    next(err);
   }
+};
 
-  /**
-   * Delete an inventory item
-   */
-  async deleteItem(req, res, next) {
-    try {
-      const item = await InventoryItem.findByPk(req.params.id);
+/**
+ * Delete an inventory item
+ */
+exports.deleteItem = async (req, res, next) => {
+  const itemId = req.params.id;
+  console.log(`InventoryController.deleteItem called for item ID: ${itemId}`);
 
-      if (!item) {
-        throw ApiError.notFound(`Inventory item with ID ${req.params.id} not found`);
-      }
+  try {
+    // Check if item exists
+    const existingItem = await inventoryRepository.findById(itemId);
 
-      await item.destroy();
-      return res.status(204).send();
-    } catch (error) {
-      next(error);
+    if (!existingItem) {
+      console.log(`Inventory item with ID ${itemId} not found`);
+      return next(ApiError.notFound(`Inventory item with ID ${itemId} not found`));
     }
+
+    // Delete the item
+    await inventoryRepository.delete(itemId);
+
+    console.log(`Inventory item ${itemId} deleted successfully`);
+    res.status(204).send();
+  } catch (err) {
+    console.error(`Error in InventoryController.deleteItem for item ${itemId}:`, err);
+    next(err);
   }
+};
 
-  /**
-   * Get inventory statistics
-   */
-  async getInventoryStats(req, res, next) {
-    try {
-      // Total items by type
-      const itemsByType = await InventoryItem.findAll({
-        attributes: [
-          'type',
-          [sequelize.fn('SUM', sequelize.col('quantity')), 'totalQuantity'],
-          [sequelize.fn('SUM', sequelize.col('available')), 'totalAvailable']
-        ],
-        group: ['type']
-      });
+/**
+ * Get inventory statistics
+ */
+exports.getInventoryStats = async (req, res, next) => {
+  console.log('InventoryController.getInventoryStats called');
 
-      // Items needing maintenance
-      const today = new Date();
-      const thirtyDaysLater = new Date();
-      thirtyDaysLater.setDate(today.getDate() + 30);
-
-      const maintenanceItems = await InventoryItem.count({
-        where: {
-          [Op.or]: [
-            { condition: 'needs-repair' },
-            { condition: 'poor' },
-            {
-              nextMaintenance: {
-                [Op.and]: [
-                  { [Op.ne]: null },
-                  { [Op.lte]: thirtyDaysLater }
-                ]
-              }
-            }
-          ]
-        }
-      });
-
-      // Next upcoming maintenance
-      const nextMaintenance = await InventoryItem.findOne({
-        where: {
-          nextMaintenance: {
-            [Op.and]: [
-              { [Op.ne]: null },
-              { [Op.gte]: today }
-            ]
-          }
-        },
-        order: [['nextMaintenance', 'ASC']],
-        attributes: ['nextMaintenance']
-      });
-
-      // Calculate utilization rate
-      const totalItems = await InventoryItem.sum('quantity');
-      const availableItems = await InventoryItem.sum('available');
-      const utilizationRate = totalItems > 0
-          ? Math.round(((totalItems - availableItems) / totalItems) * 100)
-          : 0;
-
-      return res.status(200).json({
-        itemsByType,
-        maintenanceCount: maintenanceItems,
-        nextMaintenanceDate: nextMaintenance ? nextMaintenance.nextMaintenance : null,
-        utilizationRate
-      });
-    } catch (error) {
-      next(error);
-    }
+  try {
+    const stats = await inventoryRepository.getStats();
+    console.log('Inventory statistics retrieved successfully');
+    res.status(200).json(stats);
+  } catch (err) {
+    console.error('Error in InventoryController.getInventoryStats:', err);
+    next(err);
   }
-}
-
-module.exports = new InventoryController();
+};

@@ -2,7 +2,7 @@
 import { Component, Inject, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import {MatDialogRef, MAT_DIALOG_DATA, MatDialogModule, MatDialog} from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -14,6 +14,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Task } from '../../../../services/task.service';
 import { UserService, UserProfile } from '../../../../services/user.service';
+import {CalendarModalComponent} from "../../shared/calendar-modal/calender-modal.component";
 
 interface DialogData {
   task: Task;
@@ -81,10 +82,7 @@ interface DialogData {
               </p>
             </div>
 
-            <div *ngIf="data.task.eventName">
-              <p class="text-sm text-gray-500">Event</p>
-              <p class="font-medium">{{ data.task.eventName }}</p>
-            </div>
+
 
             <div *ngIf="data.task.location">
               <p class="text-sm text-gray-500">Location</p>
@@ -183,20 +181,22 @@ interface DialogData {
               </mat-select>
             </mat-form-field>
 
-            <mat-form-field>
-              <mat-label>Due Date</mat-label>
-              <input matInput [matDatepicker]="dueDatePicker" [(ngModel)]="data.task.dueDate" name="dueDate" required>
-              <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
-              <mat-datepicker #dueDatePicker></mat-datepicker>
-            </mat-form-field>
+            <div class="custom-date-field flex flex-row items-start">
+              <mat-form-field class="flex-grow">
+                <mat-label>Due Date</mat-label>
+                <input
+                  matInput
+                  [value]="formatDate(data.task.dueDate)"
+                  name="dueDate"
+                  required
+                  readonly
+                  (click)="openCalendarModal()">
+                <mat-icon matSuffix class="cursor-pointer" (click)="openCalendarModal()">calendar_today</mat-icon>
+              </mat-form-field>
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <mat-form-field>
-              <mat-label>Event Name</mat-label>
-              <input matInput [(ngModel)]="data.task.eventName" name="eventName">
-            </mat-form-field>
-
+          <div>
             <mat-form-field>
               <mat-label>Location</mat-label>
               <input matInput [(ngModel)]="data.task.location" name="location">
@@ -351,10 +351,14 @@ export class TaskDialogComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<TaskDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
-    private userService: UserService
+    private userService: UserService,
+    private dialog: MatDialog
   ) {
     // Initialize string representations for the arrays
-    this.relatedItemsString = data.task.relatedItems ? data.task.relatedItems.join(', ') : '';
+    // Use either relatedItems or relatedItemIds (whichever exists)
+    this.relatedItemsString = data.task.relatedItems
+      ? data.task.relatedItems.join(', ')
+      : (data.task.relatedItemIds ? data.task.relatedItemIds.join(', ') : '');
   }
 
   ngOnInit(): void {
@@ -386,15 +390,19 @@ export class TaskDialogComponent implements OnInit {
 
   updateRelatedItems(): void {
     if (this.relatedItemsString.trim()) {
+      // Set the frontend property for UI display
       this.data.task.relatedItems = this.relatedItemsString
         .split(',')
         .map(item => item.trim())
         .filter(item => item.length > 0);
+
+      // Also set the backend property name for API compatibility
+      (this.data.task as any).relatedItemIds = [...this.data.task.relatedItems];
     } else {
       this.data.task.relatedItems = [];
+      (this.data.task as any).relatedItemIds = [];
     }
   }
-
   onCancel(): void {
     this.dialogRef.close();
   }
@@ -411,22 +419,51 @@ export class TaskDialogComponent implements OnInit {
     // Make sure the related items are updated
     this.updateRelatedItems();
 
+    // Ensure the task object is properly formatted
+    const taskToSave: Partial<Task> = {
+      ...this.data.task,
+      // Ensure dueDate is a valid Date object
+      dueDate: this.data.task.dueDate
+    };
+
     // Process selected users
     if (this.selectedUserIds.length > 0) {
       // Map user IDs to user names for display in UI
-      this.data.task.assignedTo = this.selectedUserIds.map(uid => {
+      taskToSave.assignedTo = this.selectedUserIds.map(uid => {
         const user = this.availableUsers.find(u => u.uid === uid);
         return user ? user.displayName : 'Unknown User';
       });
 
-      // Add a hidden field to store the actual UIDs
-      (this.data.task as any).assignedUserIds = this.selectedUserIds;
+      // Store the actual user IDs that the backend needs
+      (taskToSave as any).assignedUserIds = this.selectedUserIds;
     } else {
-      this.data.task.assignedTo = [];
-      (this.data.task as any).assignedUserIds = [];
+      taskToSave.assignedTo = [];
+      (taskToSave as any).assignedUserIds = [];
     }
 
-    this.dialogRef.close({ action: 'save', task: this.data.task });
+    // For new tasks, ensure we have the necessary default fields
+    if (this.data.isNew) {
+      taskToSave.createdAt = new Date();
+
+      // If missing required fields, set defaults
+      if (!taskToSave.status) taskToSave.status = 'pending';
+      if (!taskToSave.priority) taskToSave.priority = 'medium';
+      if (!taskToSave.type) taskToSave.type = 'general';
+    }
+
+    // Log task data for debugging
+    console.log('Saving task with data:', taskToSave);
+
+    // Close dialog and pass data to parent component
+    this.dialogRef.close({ action: 'save', task: taskToSave });
+  }
+
+  // Add a method to debug field names if needed
+  debugTaskFields(task: any): void {
+    console.log('Task fields being sent:');
+    Object.keys(task).forEach(key => {
+      console.log(`${key}: ${typeof task[key]}`, task[key]);
+    });
   }
 
   getTaskTypeClass(): string {
@@ -485,6 +522,23 @@ export class TaskDialogComponent implements OnInit {
     const taskDate = new Date(dueDate);
     taskDate.setHours(0, 0, 0, 0);
     return taskDate.getTime() < today.getTime();
+  }
+  openCalendarModal(): void {
+    if (!this.data.isEditing) return;
+
+    const dialogRef = this.dialog.open(CalendarModalComponent, {
+      width: '300px',
+      data: {
+        selectedDate: this.data.task.dueDate ? new Date(this.data.task.dueDate) : new Date(),
+        title: 'Select Due Date'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.data.task.dueDate = result;
+      }
+    });
   }
 }
 // :+)

@@ -2,6 +2,9 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
+// Determine if we're using SQLite (for mock data) or PostgreSQL
+const isSQLite = sequelize.options.dialect === 'sqlite';
+
 const Task = sequelize.define('Task', {
     id: {
         type: DataTypes.UUID,
@@ -17,17 +20,26 @@ const Task = sequelize.define('Task', {
         allowNull: true,
     },
     type: {
-        type: DataTypes.ENUM('marquee', 'toilet', 'equipment', 'vehicle', 'general'),
+        // Use ENUM for PostgreSQL, STRING for SQLite
+        type: isSQLite
+            ? DataTypes.STRING
+            : DataTypes.ENUM('marquee', 'toilet', 'equipment', 'vehicle', 'general'),
         defaultValue: 'general',
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('pending', 'in_progress', 'completed', 'delayed'),
+        // Use ENUM for PostgreSQL, STRING for SQLite
+        type: isSQLite
+            ? DataTypes.STRING
+            : DataTypes.ENUM('pending', 'in_progress', 'completed', 'delayed'),
         defaultValue: 'pending',
         allowNull: false,
     },
     priority: {
-        type: DataTypes.ENUM('low', 'medium', 'high', 'urgent'),
+        // Use ENUM for PostgreSQL, STRING for SQLite
+        type: isSQLite
+            ? DataTypes.STRING
+            : DataTypes.ENUM('low', 'medium', 'high', 'urgent'),
         defaultValue: 'medium',
         allowNull: false,
     },
@@ -35,13 +47,36 @@ const Task = sequelize.define('Task', {
         type: DataTypes.DATE,
         allowNull: false,
     },
+    // For array fields, store as JSON string in SQLite and as ARRAY in PostgreSQL
     assignedTo: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        defaultValue: [],
+        type: isSQLite
+            ? DataTypes.TEXT  // Will store JSON string
+            : DataTypes.ARRAY(DataTypes.STRING),
+        defaultValue: isSQLite ? '[]' : [],
+        get() {
+            const value = this.getDataValue('assignedTo');
+            // Parse the JSON string if SQLite
+            return isSQLite && value ? JSON.parse(value) : value;
+        },
+        set(val) {
+            // Stringify the array if SQLite
+            this.setDataValue('assignedTo', isSQLite ? JSON.stringify(val) : val);
+        }
     },
     relatedItems: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        defaultValue: [],
+        type: isSQLite
+            ? DataTypes.TEXT  // Will store JSON string
+            : DataTypes.ARRAY(DataTypes.STRING),
+        defaultValue: isSQLite ? '[]' : [],
+        get() {
+            const value = this.getDataValue('relatedItems');
+            // Parse the JSON string if SQLite
+            return isSQLite && value ? JSON.parse(value) : value;
+        },
+        set(val) {
+            // Stringify the array if SQLite
+            this.setDataValue('relatedItems', isSQLite ? JSON.stringify(val) : val);
+        }
     },
     eventName: {
         type: DataTypes.STRING,

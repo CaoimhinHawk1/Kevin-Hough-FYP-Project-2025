@@ -1,9 +1,8 @@
 // backend/src/routes/inventoryRoutes.js
 const express = require('express');
-const inventoryController = require('../controllers/inventoryController');
-const { verifyFirebaseToken, optionalAuth } = require('../middleware/firebase-auth');
-
 const router = express.Router();
+const inventoryController = require('../controllers/inventoryController');
+const { verifyFirebaseToken, optionalAuth } = require('../middleware/auth-middleware');
 
 // Public routes (optionally authenticated)
 router.get('/', optionalAuth, inventoryController.getAllItems);

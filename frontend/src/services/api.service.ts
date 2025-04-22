@@ -72,27 +72,27 @@ export class ApiService {
 
   // ITEMS API
   getItems(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/items`, { withCredentials: true })
+    return this.http.get(`${this.apiUrl}/inventory`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   getItem(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/items/${id}`, { withCredentials: true })
+    return this.http.get(`${this.apiUrl}/inventory/${id}`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   createItem(itemData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/items`, itemData, { withCredentials: true })
+    return this.http.post(`${this.apiUrl}/inventory`, itemData, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   updateItem(id: string, itemData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/items/${id}`, itemData, { withCredentials: true })
+    return this.http.put(`${this.apiUrl}/inventory/${id}`, itemData, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 
   deleteItem(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/items/${id}`, { withCredentials: true })
+    return this.http.delete(`${this.apiUrl}/inventory/${id}`, { withCredentials: true })
       .pipe(catchError(this.handleError));
   }
 }

@@ -1,11 +1,13 @@
 // backend/src/controllers/taskController.js
-const taskRepository = require('../repositories/task.repository');
+const taskRepository = require('../repository/taskRepository');
 const { ApiError } = require('../middleware/error-handler');
 
 /**
  * Get all tasks with optional filters
  */
 exports.getAllTasks = async (req, res, next) => {
+  console.log('TaskController.getAllTasks called with query:', req.query);
+
   try {
     // Extract filter parameters from query
     const filters = {
@@ -17,6 +19,7 @@ exports.getAllTasks = async (req, res, next) => {
     };
 
     const tasks = await taskRepository.findAll(filters);
+    console.log(`Retrieved ${tasks.length} tasks successfully`);
 
     // Transform data to match client-side Task interface
     const transformedTasks = tasks.map(task => ({
@@ -27,18 +30,20 @@ exports.getAllTasks = async (req, res, next) => {
       status: task.status.toLowerCase(),
       priority: task.priority.toLowerCase(),
       dueDate: task.dueDate,
-      assignedTo: task.assignedTo.map(user => user.name),
+      assignedTo: task.assignedTo || [],
+      assignedUserIds: task.assignedUserIds || [],
       relatedItems: task.relatedItemIds || [],
       eventName: task.event?.name,
       location: task.location || task.event?.location,
       completedAt: task.completedAt,
-      completedBy: task.completedBy?.name,
+      completedBy: task.completedByName,
       notes: task.notes,
       createdAt: task.createdAt
     }));
 
     res.status(200).json(transformedTasks);
   } catch (err) {
+    console.error('Error in TaskController.getAllTasks:', err);
     next(err);
   }
 };
@@ -47,10 +52,14 @@ exports.getAllTasks = async (req, res, next) => {
  * Get a specific task by ID
  */
 exports.getTask = async (req, res, next) => {
+  const taskId = req.params.id;
+  console.log(`TaskController.getTask called for task ID: ${taskId}`);
+
   try {
-    const task = await taskRepository.findById(req.params.id);
+    const task = await taskRepository.findById(taskId);
 
     if (!task) {
+      console.log(`Task with ID ${taskId} not found`);
       return next(ApiError.notFound('Task not found'));
     }
 
@@ -63,18 +72,21 @@ exports.getTask = async (req, res, next) => {
       status: task.status.toLowerCase(),
       priority: task.priority.toLowerCase(),
       dueDate: task.dueDate,
-      assignedTo: task.assignedTo.map(user => user.name),
+      assignedTo: task.assignedTo || [],
+      assignedUserIds: task.assignedUserIds || [],
       relatedItems: task.relatedItemIds || [],
       eventName: task.event?.name,
       location: task.location || task.event?.location,
       completedAt: task.completedAt,
-      completedBy: task.completedBy?.name,
+      completedBy: task.completedByName,
       notes: task.notes,
       createdAt: task.createdAt
     };
 
+    console.log(`Task ${taskId} retrieved successfully`);
     res.status(200).json(transformedTask);
   } catch (err) {
+    console.error(`Error in TaskController.getTask for task ${taskId}:`, err);
     next(err);
   }
 };
@@ -83,14 +95,19 @@ exports.getTask = async (req, res, next) => {
  * Create a new task
  */
 exports.createTask = async (req, res, next) => {
+  console.log('TaskController.createTask called with body:', JSON.stringify(req.body, null, 2));
+  console.log('Authenticated user:', req.user);
+
   try {
     // Validate required fields
     if (!req.body.title || !req.body.dueDate) {
+      console.log('Missing required fields: title and dueDate must be provided');
       return next(ApiError.badRequest('Title and due date are required'));
     }
 
     // Get current user ID from the Firebase auth middleware
     const userId = req.user.uid;
+    console.log(`Creating task for user ID: ${userId}`);
 
     // Prepare task data
     const taskData = {
@@ -99,8 +116,8 @@ exports.createTask = async (req, res, next) => {
       type: req.body.type?.toUpperCase(),
       status: req.body.status?.toUpperCase(),
       priority: req.body.priority?.toUpperCase(),
-      // Parse date strings to Date objects
-      dueDate: new Date(req.body.dueDate)
+      // Parse date strings to Date objects if needed
+      dueDate: req.body.dueDate
     };
 
     // Create task
@@ -115,18 +132,21 @@ exports.createTask = async (req, res, next) => {
       status: task.status.toLowerCase(),
       priority: task.priority.toLowerCase(),
       dueDate: task.dueDate,
-      assignedTo: task.assignedTo.map(user => user.name),
+      assignedTo: task.assignedTo || [],
+      assignedUserIds: task.assignedUserIds || [],
       relatedItems: task.relatedItemIds || [],
       eventName: task.event?.name,
       location: task.location || task.event?.location,
       completedAt: task.completedAt,
-      completedBy: task.completedBy?.name,
+      completedBy: task.completedByName,
       notes: task.notes,
       createdAt: task.createdAt
     };
 
+    console.log(`Task created successfully with ID: ${task.id}`);
     res.status(201).json(transformedTask);
   } catch (err) {
+    console.error('Error in TaskController.createTask:', err);
     next(err);
   }
 };
@@ -135,11 +155,16 @@ exports.createTask = async (req, res, next) => {
  * Update an existing task
  */
 exports.updateTask = async (req, res, next) => {
+  const taskId = req.params.id;
+  console.log(`TaskController.updateTask called for task ID: ${taskId}`);
+  console.log('Update data:', JSON.stringify(req.body, null, 2));
+
   try {
     // Check if task exists
-    const existingTask = await taskRepository.findById(req.params.id);
+    const existingTask = await taskRepository.findById(taskId);
 
     if (!existingTask) {
+      console.log(`Task with ID ${taskId} not found`);
       return next(ApiError.notFound('Task not found'));
     }
 
@@ -161,13 +186,13 @@ exports.updateTask = async (req, res, next) => {
       updateData.completedById = null;
     }
 
-    // Convert date strings to Date objects
-    if (updateData.dueDate) {
-      updateData.dueDate = new Date(updateData.dueDate);
-    }
+    // Convert string enums to uppercase
+    if (updateData.type) updateData.type = updateData.type.toUpperCase();
+    if (updateData.status) updateData.status = updateData.status.toUpperCase();
+    if (updateData.priority) updateData.priority = updateData.priority.toUpperCase();
 
     // Update the task
-    const updatedTask = await taskRepository.update(req.params.id, updateData);
+    const updatedTask = await taskRepository.update(taskId, updateData);
 
     // Transform the updated task to match the client-side interface
     const transformedTask = {
@@ -178,18 +203,21 @@ exports.updateTask = async (req, res, next) => {
       status: updatedTask.status.toLowerCase(),
       priority: updatedTask.priority.toLowerCase(),
       dueDate: updatedTask.dueDate,
-      assignedTo: updatedTask.assignedTo.map(user => user.name),
+      assignedTo: updatedTask.assignedTo || [],
+      assignedUserIds: updatedTask.assignedUserIds || [],
       relatedItems: updatedTask.relatedItemIds || [],
       eventName: updatedTask.event?.name,
       location: updatedTask.location || updatedTask.event?.location,
       completedAt: updatedTask.completedAt,
-      completedBy: updatedTask.completedBy?.name,
+      completedBy: updatedTask.completedByName,
       notes: updatedTask.notes,
       createdAt: updatedTask.createdAt
     };
 
+    console.log(`Task ${taskId} updated successfully`);
     res.status(200).json(transformedTask);
   } catch (err) {
+    console.error(`Error in TaskController.updateTask for task ${taskId}:`, err);
     next(err);
   }
 };
@@ -198,19 +226,25 @@ exports.updateTask = async (req, res, next) => {
  * Delete a task
  */
 exports.deleteTask = async (req, res, next) => {
+  const taskId = req.params.id;
+  console.log(`TaskController.deleteTask called for task ID: ${taskId}`);
+
   try {
     // Check if task exists
-    const existingTask = await taskRepository.findById(req.params.id);
+    const existingTask = await taskRepository.findById(taskId);
 
     if (!existingTask) {
+      console.log(`Task with ID ${taskId} not found`);
       return next(ApiError.notFound('Task not found'));
     }
 
     // Delete the task
-    await taskRepository.delete(req.params.id);
+    await taskRepository.delete(taskId);
 
+    console.log(`Task ${taskId} deleted successfully`);
     res.status(200).json({ message: 'Task deleted successfully' });
   } catch (err) {
+    console.error(`Error in TaskController.deleteTask for task ${taskId}:`, err);
     next(err);
   }
 };
@@ -219,10 +253,14 @@ exports.deleteTask = async (req, res, next) => {
  * Get task statistics (counts by status, type, priority)
  */
 exports.getTaskStats = async (req, res, next) => {
+  console.log('TaskController.getTaskStats called');
+
   try {
     const stats = await taskRepository.getStats();
+    console.log('Task statistics retrieved successfully');
     res.status(200).json(stats);
   } catch (err) {
+    console.error('Error in TaskController.getTaskStats:', err);
     next(err);
   }
 };

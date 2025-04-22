@@ -2,7 +2,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const InventoryItem = sequelize.define('InventoryItem', {
+const item = sequelize.define('Item', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -69,4 +69,4 @@ const InventoryItem = sequelize.define('InventoryItem', {
   }
 });
 
-module.exports = InventoryItem;
+module.exports = item;

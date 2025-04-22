@@ -8,21 +8,23 @@ class TaskRepository {
      * @param {Object} filters - Query filters
      */
     async findAll(filters = {}) {
+        console.log('TaskRepository.findAll called with filters:', filters);
+
         const where = {};
 
         // Apply type filter
         if (filters.type) {
-            where.type = filters.type;
+            where.type = filters.type.toUpperCase();
         }
 
         // Apply status filter
         if (filters.status) {
-            where.status = filters.status;
+            where.status = filters.status.toUpperCase();
         }
 
         // Apply priority filter
         if (filters.priority) {
-            where.priority = filters.priority;
+            where.priority = filters.priority.toUpperCase();
         }
 
         // Apply date range filters
@@ -38,23 +40,36 @@ class TaskRepository {
             }
         }
 
-        // Include related data
-        const include = {
-            assignedUsers: true, // Include assigned users from the Task_User relation
-            createdBy: true,
-            completedBy: true,
-            event: true,
-            customer: true
-        };
+        try {
+            // Include related data
+            const include = {
+                assignedUsers: {
+                    include: {
+                        user: true
+                    }
+                },
+                createdBy: true,
+                completedBy: true,
+                event: true,
+                customer: true
+            };
 
-        const tasks = await prisma.task.findMany({
-            where,
-            include,
-            orderBy: { dueDate: 'asc' }
-        });
+            console.log('Executing Prisma query with where:', where);
 
-        // Fetch Firebase user information for assigned user IDs
-        return await this.populateUserInformation(tasks);
+            const tasks = await prisma.task.findMany({
+                where,
+                include,
+                orderBy: { dueDate: 'asc' }
+            });
+
+            console.log(`Retrieved ${tasks.length} tasks from database`);
+
+            // Format the tasks to include user information
+            return this.formatTasksWithUserInfo(tasks);
+        } catch (error) {
+            console.error('Error in TaskRepository.findAll:', error);
+            throw error;
+        }
     }
 
     /**
@@ -62,179 +77,337 @@ class TaskRepository {
      * @param {string} id - Task ID
      */
     async findById(id) {
-        const task = await prisma.task.findUnique({
-            where: { id },
-            include: {
-                assignedUsers: true,
-                createdBy: true,
-                completedBy: true,
-                event: true,
-                customer: true,
-                marquee: true,
-                portaloo: true,
-                trailer: true
+        console.log(`TaskRepository.findById called with id: ${id}`);
+
+        try {
+            const task = await prisma.task.findUnique({
+                where: { id },
+                include: {
+                    assignedUsers: {
+                        include: {
+                            user: true
+                        }
+                    },
+                    createdBy: true,
+                    completedBy: true,
+                    event: true,
+                    customer: true,
+                    marquee: true,
+                    portaloo: true,
+                    trailer: true
+                }
+            });
+
+            if (!task) {
+                console.log(`No task found with id: ${id}`);
+                return null;
             }
-        });
 
-        if (!task) return null;
-
-        // Populate with Firebase user information
-        const tasks = await this.populateUserInformation([task]);
-        return tasks[0];
+            // Format single task with user information
+            console.log(`Found task with id: ${id}`);
+            const formattedTasks = await this.formatTasksWithUserInfo([task]);
+            return formattedTasks[0];
+        } catch (error) {
+            console.error(`Error in TaskRepository.findById for id ${id}:`, error);
+            throw error;
+        }
     }
 
     /**
      * Create a new task
      * @param {Object} data - Task data
      * @param {string} userId - ID of user creating the task
-     * @param {string[]} assignedUserIds - IDs of users assigned to the task
      */
-    async create(data, userId, assignedUserIds = []) {
-        // Extract any data that needs special handling
-        const { assignedUserIds: dataUserIds, ...taskData } = data;
+    async create(data, userId) {
+        console.log('TaskRepository.create called with data:', JSON.stringify(data, null, 2));
+        console.log('Creator userId:', userId);
 
-        // Use provided userIds or ones from the data
-        const userIds = assignedUserIds.length > 0 ? assignedUserIds : (dataUserIds || []);
+        // Prepare task data
+        const { assignedUserIds = [], ...taskData } = data;
 
-        // Create connections for related entities if provided
-        const connectData = {
-            createdBy: { connect: { id: userId } }
-        };
+        // Make sure required fields are set
+        if (!taskData.type) taskData.type = 'GENERAL';
+        if (!taskData.status) taskData.status = 'PENDING';
+        if (!taskData.priority) taskData.priority = 'MEDIUM';
 
-        // If assigned user IDs are provided, connect them
-        if (userIds && userIds.length > 0) {
-            connectData.assignedUsers = {
-                create: userIds.map(uid => ({
-                    user: { connect: { id: uid } }
-                }))
-            };
-        }
+        try {
+            // First check if the creator user exists
+            const creatorExists = await prisma.user.findUnique({
+                where: { id: userId }
+            });
 
-        if (data.eventId) {
-            connectData.event = { connect: { id: data.eventId } };
-        }
+            if (!creatorExists) {
+                console.log(`Creator user with ID ${userId} not found, creating placeholder user record`);
 
-        if (data.customerId) {
-            connectData.customer = { connect: { id: data.customerId } };
-        }
+                // Create a placeholder user if not exists
+                await prisma.user.create({
+                    data: {
+                        id: userId,
+                        name: 'Unknown User',
+                        email: `user_${userId}@placeholder.com`,
+                        role: 'USER',
+                        isAdmin: false
+                    }
+                });
 
-        if (data.marqueeId) {
-            connectData.marquee = { connect: { id: data.marqueeId } };
-        }
-
-        if (data.portalooId) {
-            connectData.portaloo = { connect: { id: data.portalooId } };
-        }
-
-        if (data.trailerId) {
-            connectData.trailer = { connect: { id: data.trailerId } };
-        }
-
-        // Convert string values to enum values
-        if (taskData.type) {
-            taskData.type = taskData.type.toUpperCase();
-        }
-
-        if (taskData.status) {
-            taskData.status = taskData.status.toUpperCase();
-        }
-
-        if (taskData.priority) {
-            taskData.priority = taskData.priority.toUpperCase();
-        }
-
-        // Create the task with all connections
-        const task = await prisma.task.create({
-            data: {
-                ...taskData,
-                ...connectData
-            },
-            include: {
-                assignedUsers: true,
-                createdBy: true,
-                event: true,
-                customer: true
+                console.log(`Created placeholder user with ID ${userId}`);
             }
-        });
 
-        // Populate with Firebase user information
-        const tasks = this.populateUserInformation([task]);
-        return tasks[0];
+            // Prepare the task data object for Prisma
+            const taskCreateData = {
+                title: taskData.title,
+                description: taskData.description || null,
+                type: taskData.type,
+                status: taskData.status,
+                priority: taskData.priority,
+                dueDate: new Date(taskData.dueDate),
+                location: taskData.location || null,
+                notes: taskData.notes || null,
+                relatedItemIds: taskData.relatedItems || [],
+
+                // Connect to the creator
+                createdBy: {
+                    connect: { id: userId }
+                }
+            };
+
+            // Only include valid connections for optional relations
+            if (taskData.eventId) {
+                taskCreateData.event = { connect: { id: taskData.eventId } };
+            }
+
+            if (taskData.customerId) {
+                taskCreateData.customer = { connect: { id: taskData.customerId } };
+            }
+
+            if (taskData.marqueeId) {
+                taskCreateData.marquee = { connect: { id: taskData.marqueeId } };
+            }
+
+            if (taskData.portalooId) {
+                taskCreateData.portaloo = { connect: { id: taskData.portalooId } };
+            }
+
+            if (taskData.trailerId) {
+                taskCreateData.trailer = { connect: { id: taskData.trailerId } };
+            }
+
+            console.log('Creating task with data:', JSON.stringify(taskCreateData, null, 2));
+
+            // Create the task
+            const task = await prisma.task.create({
+                data: taskCreateData,
+                include: {
+                    createdBy: true,
+                    event: true,
+                    customer: true
+                }
+            });
+
+            console.log(`Task created successfully with ID: ${task.id}`);
+
+            // If there are assigned users, create the connections separately
+            if (assignedUserIds && assignedUserIds.length > 0) {
+                console.log(`Processing ${assignedUserIds.length} user assignments`);
+
+                for (const assignUserId of assignedUserIds) {
+                    try {
+                        // Check if user exists
+                        let user = await prisma.user.findUnique({
+                            where: { id: assignUserId }
+                        });
+
+                        // Create placeholder user if not exists
+                        if (!user) {
+                            console.log(`Assigned user with ID ${assignUserId} not found, creating placeholder user`);
+                            user = await prisma.user.create({
+                                data: {
+                                    id: assignUserId,
+                                    name: 'Unknown User',
+                                    email: `user_${assignUserId}@placeholder.com`,
+                                    role: 'USER',
+                                    isAdmin: false
+                                }
+                            });
+                            console.log(`Created placeholder user with ID ${assignUserId}`);
+                        }
+
+                        // Create the task-user assignment
+                        await prisma.task_User.create({
+                            data: {
+                                task: { connect: { id: task.id } },
+                                user: { connect: { id: assignUserId } }
+                            }
+                        });
+
+                        console.log(`Created task assignment for user ${assignUserId}`);
+                    } catch (error) {
+                        console.error(`Error assigning user ${assignUserId} to task:`, error);
+                        // Continue with other users even if one fails
+                    }
+                }
+            }
+
+            // Fetch the complete task with all relations
+            console.log('Fetching complete task with all relations');
+            const completeTask = await this.findById(task.id);
+            return completeTask;
+        } catch (error) {
+            console.error('Error in TaskRepository.create:', error);
+            throw error;
+        }
     }
 
     /**
      * Update a task
      * @param {string} id - Task ID
      * @param {Object} data - Updated task data
-     * @param {string[]} assignedUserIds - IDs of users assigned to the task
      */
-    async update(id, data, assignedUserIds = []) {
-        // Extract data that needs special handling
-        const { assignedUserIds: dataUserIds, ...updateData } = data;
+    async update(id, data) {
+        console.log(`TaskRepository.update called for task ${id} with data:`, JSON.stringify(data, null, 2));
 
-        // Use provided userIds or ones from the data
-        const userIds = assignedUserIds.length > 0 ? assignedUserIds : (dataUserIds || []);
+        const { assignedUserIds, ...updateData } = data;
 
-        // Handle completion data
-        if (updateData.status === 'COMPLETED' && !updateData.completedAt) {
-            updateData.completedAt = new Date();
-        }
+        try {
+            // Prepare the update data
+            const taskUpdateData = { ...updateData };
 
-        // Handle user assignments if provided
-        if (userIds) {
-            // First delete existing assignments
-            await prisma.task_User.deleteMany({
-                where: { taskId: id }
+            // Handle date conversions
+            if (taskUpdateData.dueDate) {
+                taskUpdateData.dueDate = new Date(taskUpdateData.dueDate);
+            }
+
+            // Handle relatedItems if present
+            if (taskUpdateData.relatedItems) {
+                taskUpdateData.relatedItemIds = taskUpdateData.relatedItems;
+                delete taskUpdateData.relatedItems;
+            }
+
+            // Handle optional relations
+            if (updateData.eventId) {
+                taskUpdateData.event = { connect: { id: updateData.eventId } };
+                delete taskUpdateData.eventId;
+            }
+
+            if (updateData.customerId) {
+                taskUpdateData.customer = { connect: { id: updateData.customerId } };
+                delete taskUpdateData.customerId;
+            }
+
+            if (updateData.marqueeId) {
+                taskUpdateData.marquee = { connect: { id: updateData.marqueeId } };
+                delete taskUpdateData.marqueeId;
+            }
+
+            if (updateData.portalooId) {
+                taskUpdateData.portaloo = { connect: { id: updateData.portalooId } };
+                delete taskUpdateData.portalooId;
+            }
+
+            if (updateData.trailerId) {
+                taskUpdateData.trailer = { connect: { id: updateData.trailerId } };
+                delete taskUpdateData.trailerId;
+            }
+
+            if (updateData.completedById) {
+                // Check if user exists
+                let user = await prisma.user.findUnique({
+                    where: { id: updateData.completedById }
+                });
+
+                // Create placeholder user if not exists
+                if (!user) {
+                    console.log(`Completion user with ID ${updateData.completedById} not found, creating placeholder user`);
+                    user = await prisma.user.create({
+                        data: {
+                            id: updateData.completedById,
+                            name: 'Unknown User',
+                            email: `user_${updateData.completedById}@placeholder.com`,
+                            role: 'USER',
+                            isAdmin: false
+                        }
+                    });
+                }
+
+                taskUpdateData.completedBy = { connect: { id: updateData.completedById } };
+                delete taskUpdateData.completedById;
+            }
+
+            console.log('Updating task with data:', JSON.stringify(taskUpdateData, null, 2));
+
+            // Update the task
+            const task = await prisma.task.update({
+                where: { id },
+                data: taskUpdateData,
+                include: {
+                    createdBy: true,
+                    completedBy: true,
+                    event: true,
+                    customer: true
+                }
             });
 
-            // Then create new assignments if there are any users
-            if (userIds.length > 0) {
-                await Promise.all(userIds.map(uid =>
-                    prisma.task_User.create({
-                        data: {
-                            task: { connect: { id } },
-                            user: { connect: { id: uid } }
+            console.log(`Task ${id} updated successfully`);
+
+            // If assignedUserIds is provided, update the assignments
+            if (assignedUserIds !== undefined) {
+                // First, delete all current assignments
+                const deletedAssignments = await prisma.task_User.deleteMany({
+                    where: { taskId: id }
+                });
+
+                console.log(`Deleted ${deletedAssignments.count} existing user assignments`);
+
+                // Then create new assignments if there are any users
+                if (assignedUserIds && assignedUserIds.length > 0) {
+                    console.log(`Creating ${assignedUserIds.length} new user assignments`);
+
+                    for (const assignUserId of assignedUserIds) {
+                        try {
+                            // Check if user exists
+                            let user = await prisma.user.findUnique({
+                                where: { id: assignUserId }
+                            });
+
+                            // Create placeholder user if not exists
+                            if (!user) {
+                                console.log(`Assigned user with ID ${assignUserId} not found, creating placeholder user`);
+                                user = await prisma.user.create({
+                                    data: {
+                                        id: assignUserId,
+                                        name: 'Unknown User',
+                                        email: `user_${assignUserId}@placeholder.com`,
+                                        role: 'USER',
+                                        isAdmin: false
+                                    }
+                                });
+                            }
+
+                            // Create the task-user assignment
+                            await prisma.task_User.create({
+                                data: {
+                                    task: { connect: { id: task.id } },
+                                    user: { connect: { id: assignUserId } }
+                                }
+                            });
+
+                            console.log(`Created task assignment for user ${assignUserId}`);
+                        } catch (error) {
+                            console.error(`Error assigning user ${assignUserId} to task:`, error);
+                            // Continue with other users even if one fails
                         }
-                    })
-                ));
+                    }
+                }
             }
+
+            // Fetch the complete task with all relations
+            console.log('Fetching complete task with all relations');
+            const completeTask = await this.findById(task.id);
+            return completeTask;
+        } catch (error) {
+            console.error(`Error in TaskRepository.update for task ${id}:`, error);
+            throw error;
         }
-
-        // Handle completedBy connection if provided
-        if (updateData.completedById) {
-            updateData.completedBy = { connect: { id: updateData.completedById } };
-            delete updateData.completedById;
-        }
-
-        // Convert string values to enum values
-        if (updateData.type) {
-            updateData.type = updateData.type.toUpperCase();
-        }
-
-        if (updateData.status) {
-            updateData.status = updateData.status.toUpperCase();
-        }
-
-        if (updateData.priority) {
-            updateData.priority = updateData.priority.toUpperCase();
-        }
-
-        // Update the task
-        const task = await prisma.task.update({
-            where: { id },
-            data: updateData,
-            include: {
-                assignedUsers: true,
-                createdBy: true,
-                completedBy: true,
-                event: true,
-                customer: true
-            }
-        });
-
-        // Populate with Firebase user information
-        const tasks = await this.populateUserInformation([task]);
-        return tasks[0];
     }
 
     /**
@@ -242,91 +415,111 @@ class TaskRepository {
      * @param {string} id - Task ID
      */
     async delete(id) {
-        // First delete all user assignments
-        await prisma.task_User.deleteMany({
-            where: { taskId: id }
-        });
+        console.log(`TaskRepository.delete called for task ${id}`);
 
-        // Then delete the task
-        return prisma.task.delete({
-            where: { id }
-        });
+        try {
+            // First delete all task user assignments
+            const deletedAssignments = await prisma.task_User.deleteMany({
+                where: { taskId: id }
+            });
+
+            console.log(`Deleted ${deletedAssignments.count} user assignments for task ${id}`);
+
+            // Then delete the task
+            const deletedTask = await prisma.task.delete({
+                where: { id }
+            });
+
+            console.log(`Task ${id} deleted successfully`);
+            return deletedTask;
+        } catch (error) {
+            console.error(`Error in TaskRepository.delete for task ${id}:`, error);
+            throw error;
+        }
     }
 
     /**
-     * Get tasks statistics (counts by type, status, etc)
+     * Get tasks statistics (counts by status, type, priority)
      */
     async getStats() {
-        // Today's date (start of day)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        console.log('TaskRepository.getStats called');
 
-        // Get count of tasks by status
-        const statusCounts = await prisma.task.groupBy({
-            by: ['status'],
-            _count: { _all: true }
-        });
+        try {
+            // Today's date (start of day)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-        // Get count of tasks by type
-        const typeCounts = await prisma.task.groupBy({
-            by: ['type'],
-            _count: { _all: true }
-        });
+            // Get count of tasks by status
+            const statusCounts = await prisma.task.groupBy({
+                by: ['status'],
+                _count: { _all: true }
+            });
 
-        // Get count of tasks by priority
-        const priorityCounts = await prisma.task.groupBy({
-            by: ['priority'],
-            _count: { _all: true }
-        });
+            // Get count of tasks by type
+            const typeCounts = await prisma.task.groupBy({
+                by: ['type'],
+                _count: { _all: true }
+            });
 
-        // Count today's tasks (not completed)
-        const todayTasks = await prisma.task.count({
-            where: {
-                dueDate: {
-                    gte: today,
-                    lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
-                },
-                status: { not: 'COMPLETED' }
-            }
-        });
+            // Get count of tasks by priority
+            const priorityCounts = await prisma.task.groupBy({
+                by: ['priority'],
+                _count: { _all: true }
+            });
 
-        // Count upcoming tasks (future date, not completed)
-        const upcomingTasks = await prisma.task.count({
-            where: {
-                dueDate: { gt: new Date(today.getTime() + 24 * 60 * 60 * 1000) },
-                status: { not: 'COMPLETED' }
-            }
-        });
+            // Count today's tasks (not completed)
+            const todayTasks = await prisma.task.count({
+                where: {
+                    dueDate: {
+                        gte: today,
+                        lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+                    },
+                    status: { not: 'COMPLETED' }
+                }
+            });
 
-        // Count overdue tasks (past date, not completed)
-        const overdueTasks = await prisma.task.count({
-            where: {
-                dueDate: { lt: today },
-                status: { not: 'COMPLETED' }
-            }
-        });
+            // Count upcoming tasks (future date, not completed)
+            const upcomingTasks = await prisma.task.count({
+                where: {
+                    dueDate: { gt: new Date(today.getTime() + 24 * 60 * 60 * 1000) },
+                    status: { not: 'COMPLETED' }
+                }
+            });
 
-        // Count total tasks
-        const totalTasks = await prisma.task.count();
+            // Count overdue tasks (past date, not completed)
+            const overdueTasks = await prisma.task.count({
+                where: {
+                    dueDate: { lt: today },
+                    status: { not: 'COMPLETED' }
+                }
+            });
 
-        // Format the counts into a stats object
-        const stats = {
-            totalTasks,
-            statusCounts: Object.fromEntries(
-                statusCounts.map(({ status, _count }) => [status.toLowerCase(), _count._all])
-            ),
-            typeCounts: Object.fromEntries(
-                typeCounts.map(({ type, _count }) => [type.toLowerCase(), _count._all])
-            ),
-            priorityCounts: Object.fromEntries(
-                priorityCounts.map(({ priority, _count }) => [priority.toLowerCase(), _count._all])
-            ),
-            todayTasks,
-            upcomingTasks,
-            overdueTasks
-        };
+            // Count total tasks
+            const totalTasks = await prisma.task.count();
 
-        return stats;
+            // Format the counts into a stats object
+            const stats = {
+                totalTasks,
+                statusCounts: Object.fromEntries(
+                    statusCounts.map(({ status, _count }) => [status.toLowerCase(), _count._all])
+                ),
+                typeCounts: Object.fromEntries(
+                    typeCounts.map(({ type, _count }) => [type.toLowerCase(), _count._all])
+                ),
+                priorityCounts: Object.fromEntries(
+                    priorityCounts.map(({ priority, _count }) => [priority.toLowerCase(), _count._all])
+                ),
+                todayTasks,
+                upcomingTasks,
+                overdueTasks
+            };
+
+            console.log('Task stats retrieved successfully:', stats);
+            return stats;
+        } catch (error) {
+            console.error('Error in TaskRepository.getStats:', error);
+            throw error;
+        }
     }
 
     /**
@@ -334,114 +527,67 @@ class TaskRepository {
      * @param {string} userId - User ID
      */
     async getTasksByUser(userId) {
-        const tasks = await prisma.task.findMany({
-            where: {
-                assignedUsers: {
-                    some: {
-                        userId
-                    }
-                }
-            },
-            include: {
-                assignedUsers: true,
-                createdBy: true,
-                completedBy: true,
-                event: true,
-                customer: true
-            },
-            orderBy: { dueDate: 'asc' }
-        });
+        console.log(`TaskRepository.getTasksByUser called for user ${userId}`);
 
-        return this.populateUserInformation(tasks);
+        try {
+            const tasks = await prisma.task.findMany({
+                where: {
+                    assignedUsers: {
+                        some: {
+                            userId
+                        }
+                    }
+                },
+                include: {
+                    assignedUsers: {
+                        include: {
+                            user: true
+                        }
+                    },
+                    createdBy: true,
+                    completedBy: true,
+                    event: true,
+                    customer: true
+                },
+                orderBy: { dueDate: 'asc' }
+            });
+
+            console.log(`Retrieved ${tasks.length} tasks assigned to user ${userId}`);
+            return this.formatTasksWithUserInfo(tasks);
+        } catch (error) {
+            console.error(`Error in TaskRepository.getTasksByUser for user ${userId}:`, error);
+            throw error;
+        }
     }
 
     /**
-     * Helper method to populate Firebase user information for assigned users
-     * @param {Array} tasks - Array of tasks with assignedUsers relations
-     * @returns {Array} - Tasks with populated user information
+     * Format tasks to include user information in a consistent way
+     * @param {Array} tasks - Array of task objects from Prisma
      */
-    async populateUserInformation(tasks) {
+    async formatTasksWithUserInfo(tasks) {
         if (!tasks || tasks.length === 0) return [];
 
-        // Collect all unique user IDs from assigned users
-        const userIds = new Set();
-        tasks.forEach(task => {
-            (task.assignedUsers || []).forEach(assignment => {
-                userIds.add(assignment.userId);
-            });
-
-            if (task.createdById) {
-                userIds.add(task.createdById);
-            }
-
-            if (task.completedById) {
-                userIds.add(task.completedById);
-            }
-        });
-
-        // If no user IDs, return tasks as is
-        if (userIds.size === 0) {
-            return tasks.map(task => ({
-                ...task,
-                assignedTo: []
-            }));
-        }
-
-        try {
-            // Get Firebase user records for these IDs
-            const userRecords = await Promise.all(
-                Array.from(userIds).map(async uid => {
-                    try {
-                        return await admin.auth().getUser(uid);
-                    } catch (error) {
-                        console.error(`Failed to fetch user ${uid}:`, error);
-                        return {
-                            uid,
-                            displayName: 'Unknown User',
-                            email: ''
-                        };
-                    }
-                })
+        return tasks.map(task => {
+            // Create an array of user display names from the task_user relations
+            const assignedTo = task.assignedUsers.map(assignment =>
+                assignment.user.name || 'Unknown User'
             );
 
-            // Create a map of user IDs to display names
-            const userMap = userRecords.reduce((map, user) => {
-                map[user.uid] = user.displayName || user.email || 'Unknown User';
-                return map;
-            }, {});
+            // Create an array of user IDs for the API
+            const assignedUserIds = task.assignedUsers.map(assignment =>
+                assignment.userId
+            );
 
-            // Add user display names to tasks
-            return tasks.map(task => {
-                // Map assigned users to their display names
-                const assignedTo = (task.assignedUsers || []).map(assignment =>
-                    userMap[assignment.userId] || 'Unknown User'
-                );
-
-                // Get creator name
-                const createdBy = task.createdById ? userMap[task.createdById] : null;
-
-                // Get completer name
-                const completedBy = task.completedById ? userMap[task.completedById] : null;
-
-                // Keep the original assigned user IDs for the API
-                const assignedUserIds = (task.assignedUsers || []).map(assignment => assignment.userId);
-
-                return {
-                    ...task,
-                    assignedTo,
-                    assignedUserIds,
-                    createdByName: createdBy,
-                    completedByName: completedBy
-                };
-            });
-        } catch (error) {
-            console.error('Error fetching user information:', error);
-            // Return tasks without user information in case of error
-            return tasks.map(task => ({
+            // Format the task object
+            return {
                 ...task,
-                assignedTo: (task.assignedUsers || []).map(() => 'Unknown User')
-            }));
-        }
+                assignedTo,
+                assignedUserIds,
+                // Keep only necessary properties from related objects
+                createdByName: task.createdBy ? task.createdBy.name : null,
+                completedByName: task.completedBy ? task.completedBy.name : null
+            };
+        });
     }
 }
 
